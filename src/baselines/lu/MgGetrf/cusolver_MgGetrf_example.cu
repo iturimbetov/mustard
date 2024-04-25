@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
     int64_t lwork_getrs = 0;
     int64_t lwork = 0; /* workspace: number of elements per device */
 
-    std::printf("Test 1D Laplacian of order %d\n", N);
+    std::printf("Test 1D Laplacian of order %d\n", (int)N);
 
     std::printf("Step 1: Create Mg handle and select devices \n");
     CUSOLVER_CHECK(cusolverMgCreate(&cusolverH));
