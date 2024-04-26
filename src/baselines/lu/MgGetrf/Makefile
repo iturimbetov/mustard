@@ -326,10 +326,10 @@ else
 endif
 
 cusolver_MgGetrf_example.o:cusolver_MgGetrf_example.cu
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) -g -D_GLIBCXX_DEBUG -Xcompiler -Werror -D_FORCE_INLINES -DVERBOSE --expt-extended-lambda -use_fast_math --expt-relaxed-constexpr -L$(CUDA_PATH)/lib64 $(GENCODE_FLAGS) -o $@ -c $<
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) -Xcompiler -Werror -D_FORCE_INLINES -DVERBOSE --expt-extended-lambda -use_fast_math --expt-relaxed-constexpr -L$(CUDA_PATH)/lib64 $(GENCODE_FLAGS) -o $@ -c $<
 
 cusolver_MgGetrf_example: cusolver_MgGetrf_example.o
-	$(EXEC) $(NVCC) -g -D_GLIBCXX_DEBUG $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES) -L$(CUDA_PATH)/lib64
+	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES) -L$(CUDA_PATH)/lib64
 	#$(EXEC) mkdir -p ../../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 	#$(EXEC) cp $@ ../../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 
@@ -343,3 +343,4 @@ clean:
 	#rm -rf ../../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/pers_test
 
 clobber: clean
+                                        

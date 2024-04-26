@@ -192,15 +192,15 @@ int main(int argc, char *argv[]) {
     print_matrix(N, N, A, lda);
 #endif
 
-    /* B = ones(N,1) */
-    for (int row = 1; row <= N; row++) {
-        B[IDX1F(row)] = 1.0;
-    }
+    // /* B = ones(N,1) */
+    // for (int row = 1; row <= N; row++) {
+    //     B[IDX1F(row)] = 1.0;
+    // }
 
-#ifdef SHOW_FORMAT
-    std::printf("B = matlab base-1\n");
-    print_matrix(N, 1, B.data(), ldb, CUBLAS_OP_T);
-#endif
+// #ifdef SHOW_FORMAT
+//     std::printf("B = matlab base-1\n");
+//     print_matrix(N, 1, B.data(), ldb, CUBLAS_OP_T);
+// #endif
 
     std::printf("Step 5: Create matrix descriptors for A and B \n");
 

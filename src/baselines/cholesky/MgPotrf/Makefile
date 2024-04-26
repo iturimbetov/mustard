@@ -326,10 +326,10 @@ else
 endif
 
 cusolver_MgPotrf_example1.o:cusolver_MgPotrf_example1.cu
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) -g -D_GLIBCXX_DEBUG -Xcompiler -Werror -D_FORCE_INLINES -DVERBOSE --expt-extended-lambda -use_fast_math --expt-relaxed-constexpr -L$(CUDA_PATH)/lib64 $(GENCODE_FLAGS) -o $@ -c $<
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) -Xcompiler -Werror -D_FORCE_INLINES -DVERBOSE --expt-extended-lambda -use_fast_math --expt-relaxed-constexpr -L$(CUDA_PATH)/lib64 $(GENCODE_FLAGS) -o $@ -c $<
 
 cusolver_MgPotrf_example1: cusolver_MgPotrf_example1.o
-	$(EXEC) $(NVCC) -g -D_GLIBCXX_DEBUG $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES) -L$(CUDA_PATH)/lib64
+	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES) -L$(CUDA_PATH)/lib64
 	#$(EXEC) mkdir -p ../../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 	#$(EXEC) cp $@ ../../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 
