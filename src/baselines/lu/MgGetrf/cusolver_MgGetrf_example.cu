@@ -62,31 +62,31 @@
 #include "argh.h"
 #include "utils.h"
 
-/* compute |x|_inf */
-template <typename T> static T vec_nrm_inf(int n, const T *x) {
-    T max_nrm = 0.0;
-    for (int row = 1; row <= n; row++) {
-        T xi = x[IDX1F(row)];
-        max_nrm = (max_nrm > fabs(xi)) ? max_nrm : fabs(xi);
-    }
-    return max_nrm;
-}
+// /* compute |x|_inf */
+// template <typename T> static T vec_nrm_inf(int n, const T *x) {
+//     T max_nrm = 0.0;
+//     for (int row = 1; row <= n; row++) {
+//         T xi = x[IDX1F(row)];
+//         max_nrm = (max_nrm > fabs(xi)) ? max_nrm : fabs(xi);
+//     }
+//     return max_nrm;
+// }
 
-/* A is 1D laplacian, return A(N:-1:1, :) */
-template <typename T> static void gen_1d_laplacian(int N, T *A, int lda) {
-    for (int J = 1; J <= N; J++) {
-        /* A(J,J) = 2 */
-        A[IDX2F(N - J + 1, J, lda)] = 2.0;
-        if ((J - 1) >= 1) {
-            /* A(J, J-1) = -1*/
-            A[IDX2F(N - J + 1, J - 1, lda)] = -1.0;
-        }
-        if ((J + 1) <= N) {
-            /* A(J, J+1) = -1*/
-            A[IDX2F(N - J + 1, J + 1, lda)] = -1.0;
-        }
-    }
-}
+// /* A is 1D laplacian, return A(N:-1:1, :) */
+// template <typename T> static void gen_1d_laplacian(int N, T *A, int lda) {
+//     for (int J = 1; J <= N; J++) {
+//         /* A(J,J) = 2 */
+//         A[IDX2F(N - J + 1, J, lda)] = 2.0;
+//         if ((J - 1) >= 1) {
+//             /* A(J, J-1) = -1*/
+//             A[IDX2F(N - J + 1, J - 1, lda)] = -1.0;
+//         }
+//         if ((J + 1) <= N) {
+//             /* A(J, J+1) = -1*/
+//             A[IDX2F(N - J + 1, J + 1, lda)] = -1.0;
+//         }
+//     }
+// }
 
 int main(int argc, char *argv[]) {
     auto cmdl = argh::parser(argc, argv);
@@ -129,17 +129,17 @@ int main(int argc, char *argv[]) {
     const int JA = 1;
     const int lda = N;
 
-    const int IB = 1;
-    const int JB = 1;
-    const int T_B = 10; //0; /* tile size of B */
-    const int ldb = N;
+    // const int IB = 1;
+    // const int JB = 1;
+    // const int T_B = 10; //0; /* tile size of B */
+    // const int ldb = N;
 
     int info = 0;
 
     cudaLibMgMatrixDesc_t descrA;
-    cudaLibMgMatrixDesc_t descrB;
+    // cudaLibMgMatrixDesc_t descrB;
     cudaLibMgGrid_t gridA;
-    cudaLibMgGrid_t gridB;
+    // cudaLibMgGrid_t gridB;
     cusolverMgGridMapping_t mapping = CUDALIBMG_GRID_MAPPING_COL_MAJOR;
 
     int64_t lwork_getrf = 0;
@@ -177,9 +177,9 @@ int main(int argc, char *argv[]) {
         return 0;
     }
     // std::vector<data_type> A(lda * N, 0);
-    std::vector<data_type> B(ldb, 0);
-    std::vector<data_type> X(ldb, 0);
-    std::vector<int> IPIV(N, 0);
+    // std::vector<data_type> B(ldb, 0);
+    // std::vector<data_type> X(ldb, 0);
+    // std::vector<int> IPIV(N, 0);
 
     std::printf("Step 4: Prepare 1D Laplacian \n");
     // gen_1d_laplacian<data_type>(N, &A[IDX2F(IA, JA, lda)], lda);
@@ -205,7 +205,7 @@ int main(int argc, char *argv[]) {
     std::printf("Step 5: Create matrix descriptors for A and B \n");
 
     CUSOLVER_CHECK(cusolverMgCreateDeviceGrid(&gridA, 1, nbGpus, deviceList.data(), mapping));
-    CUSOLVER_CHECK(cusolverMgCreateDeviceGrid(&gridB, 1, nbGpus, deviceList.data(), mapping));
+    // CUSOLVER_CHECK(cusolverMgCreateDeviceGrid(&gridB, 1, nbGpus, deviceList.data(), mapping));
 
     /* (global) A is N-by-N */
     CUSOLVER_CHECK(cusolverMgCreateMatrixDesc(&descrA, N, /* nubmer of rows of (global) A */
@@ -215,17 +215,17 @@ int main(int argc, char *argv[]) {
                                               traits<data_type>::cuda_data_type, gridA));
 
     /* (global) B is N-by-1 */
-    CUSOLVER_CHECK(cusolverMgCreateMatrixDesc(&descrB, N, /* nubmer of rows of (global) B */
-                                              1,          /* number of columns of (global) B */
-                                              N,          /* number or rows in a tile */
-                                              T_B,        /* number of columns in a tile */
-                                              traits<data_type>::cuda_data_type, gridB));
+    // CUSOLVER_CHECK(cusolverMgCreateMatrixDesc(&descrB, N, /* nubmer of rows of (global) B */
+    //                                           1,          /* number of columns of (global) B */
+    //                                           N,          /* number or rows in a tile */
+    //                                           T_B,        /* number of columns in a tile */
+    //                                           traits<data_type>::cuda_data_type, gridB));
 
     std::printf("Step 6: Allocate distributed matrices A and D \n");
 
     std::vector<data_type *> array_d_A(nbGpus, nullptr);
-    std::vector<data_type *> array_d_B(nbGpus, nullptr);
-    std::vector<int *> array_d_IPIV(nbGpus, NULL);
+    // std::vector<data_type *> array_d_B(nbGpus, nullptr);
+    // std::vector<int *> array_d_IPIV(nbGpus, NULL);
 
     /* A := 0 */
     createMat<data_type>(nbGpus, deviceList.data(), N, /* number of columns of global A */
@@ -234,16 +234,16 @@ int main(int argc, char *argv[]) {
                          array_d_A.data());
 
     /* B := 0 */
-    createMat<data_type>(nbGpus, deviceList.data(), 1, /* number of columns of global B */
-                         T_B,                          /* number of columns per column tile */
-                         ldb,                          /* leading dimension of local B */
-                         array_d_B.data());
+    // createMat<data_type>(nbGpus, deviceList.data(), 1, /* number of columns of global B */
+    //                      T_B,                          /* number of columns per column tile */
+    //                      ldb,                          /* leading dimension of local B */
+    //                      array_d_B.data());
 
-    /* IPIV := 0, IPIV is consistent with A */
-    createMat<int>(nbGpus, deviceList.data(), N, /* number of columns of global IPIV */
-                   T,                          /* number of columns per column tile */
-                   1,                            /* leading dimension of local IPIV */
-                   array_d_IPIV.data());
+    // /* IPIV := 0, IPIV is consistent with A */
+    // createMat<int>(nbGpus, deviceList.data(), N, /* number of columns of global IPIV */
+    //                T,                          /* number of columns per column tile */
+    //                1,                            /* leading dimension of local IPIV */
+    //                array_d_IPIV.data());
 
     std::printf("Step 7: Prepare data on devices \n");
     memcpyH2D<data_type>(nbGpus, deviceList.data(), N, N,
@@ -256,21 +256,21 @@ int main(int argc, char *argv[]) {
                          array_d_A.data(), /* host pointer array of dimension nbGpus */
                          IA, JA);
 
-    memcpyH2D<data_type>(nbGpus, deviceList.data(), N, 1,
-                         /* input */
-                         B.data(), ldb,
-                         /* output */
-                         1,                /* number of columns of global A */
-                         T_B,              /* number of columns per column tile */
-                         ldb,              /* leading dimension of local A */
-                         array_d_B.data(), /* host pointer array of dimension nbGpus */
-                         IB, JB);
+    // memcpyH2D<data_type>(nbGpus, deviceList.data(), N, 1,
+    //                      /* input */
+    //                      B.data(), ldb,
+    //                      /* output */
+    //                      1,                /* number of columns of global A */
+    //                      T_B,              /* number of columns per column tile */
+    //                      ldb,              /* leading dimension of local A */
+    //                      array_d_B.data(), /* host pointer array of dimension nbGpus */
+    //                      IB, JB);
 
     std::printf("Step 8: Allocate workspace space \n");
     CUSOLVER_CHECK(cusolverMgGetrf_bufferSize(
         cusolverH, N, N, reinterpret_cast<void **>(array_d_A.data()), IA, /* base-1 */
         JA,                                                               /* base-1 */
-        descrA, array_d_IPIV.data(), traits<data_type>::cuda_data_type, &lwork_getrf));
+        descrA, NULL, traits<data_type>::cuda_data_type, &lwork_getrf));
 
     // CUSOLVER_CHECK(cusolverMgGetrs_bufferSize(
     //     cusolverH, CUBLAS_OP_N, N, 1, /* NRHS */
@@ -301,7 +301,7 @@ int main(int argc, char *argv[]) {
         auto start = std::chrono::high_resolution_clock::now();
         CUSOLVER_CHECK(
             cusolverMgGetrf(cusolverH, N, N, reinterpret_cast<void **>(array_d_A.data()), IA, JA,
-                            descrA, array_d_IPIV.data(), traits<data_type>::cuda_data_type,
+                            descrA, NULL/*array_d_IPIV.data()*/, traits<data_type>::cuda_data_type,
                             reinterpret_cast<void **>(array_d_work.data()), lwork, &info /* host */
                             ));
         //clock.end();
@@ -418,9 +418,9 @@ int main(int argc, char *argv[]) {
     destroyMat(nbGpus, deviceList.data(), N, /* number of columns of global A */
                T,                          /* number of columns per column tile */
                reinterpret_cast<void **>(array_d_A.data()));
-    destroyMat(nbGpus, deviceList.data(), 1, /* number of columns of global B */
-               T_B,                          /* number of columns per column tile */
-               reinterpret_cast<void **>(array_d_B.data()));
+    // destroyMat(nbGpus, deviceList.data(), 1, /* number of columns of global B */
+    //            T_B,                          /* number of columns per column tile */
+    //            reinterpret_cast<void **>(array_d_B.data()));
     // destroyMat(nbGpus, deviceList.data(), N, /* number of columns of global IPIV */
     //            T,                          /* number of columns per column tile */
     //            reinterpret_cast<void **>(array_d_IPIV.data()));
