@@ -54,12 +54,14 @@ else
     echo "method $method";
 fi
 
-STARPU_BUILD_DIR="/truba/home/iturimbetov/starpu/build"
-MG_SAMPLES_DIR="../baselines/cholesky/MgPotrf"
+SLATE_DIR="../baselines/slate"
+STARPU_DIR="../baselines/starpu/cholesky"
+MG_SAMPLES_DIR="../baselines/cusolver_Mg"
 MCUDAGRAPH_DIR="../mustard"
 
 tile_counts=(6 8)
-matrix_sizes=(12000 24000 36000 48000 60000 72000)
+matrix_sizes=(1200)
+# matrix_sizes=(12000 24000 36000 48000 60000 72000)
 # T=6
 # N=24000
 sm_count=100
@@ -67,17 +69,25 @@ workspace=2048
 skip_gpu_regex='^(3|5|7)$'
 TS=12
 verb=""
-timeoutcmd="timeout 5m "
+timeoutcmd="timeout 15m "
 for N in "${matrix_sizes[@]}"
 do 
     outfolder=/truba_scratch/iturimbetov/mustard_logs/chol/$N
     mkdir -p $outfolder
-    if [ $method -eq -1 ] || [ $method -eq 1 ]; then $timeoutcmd $MPI_HOME/bin/mpirun -n 1 $MCUDAGRAPH_DIR/chol_partg -N=$N $verb -run=$runs >> $outfolder/log0_$N.log ; fi        
+    if [ $method -eq -1 ] || [ $method -eq 1 ]; then
+        $timeoutcmd $MPI_HOME/bin/mpirun -n 1 $MCUDAGRAPH_DIR/chol_partg \
+            -N=$N $verb -run=$runs \
+            >> $outfolder/log0_$N.log ; 
+    fi        
     for T in "${tile_counts[@]}"
     do 
         if [ $gpu_count -eq -1 ]
         then 
-            if [ $method -eq -1 ] || [ $method -eq 2 ]; then $timeoutcmd $MPI_HOME/bin/mpirun -n 1 $MCUDAGRAPH_DIR/chol_partg -N=$N -T=$T -tiled $verb -workspace=$workspace -sm=$sm_count -run=$runs >> $outfolder/log1_$N\_$T.log ; fi
+            if [ $method -eq -1 ] || [ $method -eq 2 ]; then
+                $timeoutcmd $MPI_HOME/bin/mpirun -n 1 $MCUDAGRAPH_DIR/chol_partg \
+                    -N=$N -T=$T -tiled $verb -workspace=$workspace -sm=$sm_count -run=$runs \
+                    >> $outfolder/log1_$N\_$T.log ; 
+            fi
                 
             export CUDA_VISIBLE_DEVICES="0"
             for ((g = 1 ; g <= 8 ; g++ )); do
@@ -87,30 +97,49 @@ do
                 else
                     B=$(( N / T ))
                     echo $B
-                    if [ $method -eq -1 ] || [ $method -eq 3 ]; then $timeoutcmd $MPI_HOME/bin/mpirun -n $g $MCUDAGRAPH_DIR/chol_partg -N=$N -T=$T -subgraph $verb -workspace=$workspace -sm=$sm_count -run=$runs >> $outfolder/log2_$N\_$T\_$g\GPU.log  ; fi
-                    if [ $method -eq -1 ] || [ $method -eq 4 ]; then $timeoutcmd $MG_SAMPLES_DIR/cusolver_MgPotrf_example1 -N=$N -B=$B -r=$runs >> $outfolder/log3_$N\_$T\_$g\GPU.log ; fi
+                    if [ $method -eq -1 ] || [ $method -eq 3 ]; then
+                        $timeoutcmd $MPI_HOME/bin/mpirun -n $g $MCUDAGRAPH_DIR/chol_partg \
+                            -N=$N -T=$T -subgraph $verb -workspace=$workspace -sm=$sm_count -run=$runs \
+                            >> $outfolder/log2_$N\_$T\_$g\GPU.log  ; 
+                    fi
+                    if [ $method -eq -1 ] || [ $method -eq 4 ]; then
+                        $timeoutcmd $MG_SAMPLES_DIR/cusolver_MgPotrf_example1 \
+                            -N=$N -B=$B -r=$runs \
+                            >> $outfolder/log3_$N\_$T\_$g\GPU.log ; 
+                    fi
                         
-                    # for ((i = 0 ; i < $runs ; i++ )); do
-                    #     if [ $method -eq -1 ] || [ $method -eq 5 ]; then STARPU_SCHED=dmdas $STARPU_BUILD_DIR/examples/lu/lu_example_double -size $(($N)) -nblocks $TS >> $outfolder/log4_$N\_$TS\_$g\GPU.log ; fi
-                    #     #STARPU_SCHED=dmdas $STARPU_BUILD_DIR/examples/lu/lu_example_double -size $((24000)) -nblocks 12; done
-                    # done
+                    for ((i = 0 ; i < $runs ; i++ )); do
+                        if [ $method -eq -1 ] || [ $method -eq 5 ]; then 
+                            STARPU_NCPU=0 STARPU_DISABLE_PINNING=1 STARPU_SCHED=dmdas \ 
+                            STARPU_PERF_MODEL_HOMOGENEOUS_CUDA=1 STARPU_PERF_MODEL_HOMOGENEOUS_CPU=1 \
+                            $timeoutcmd $STARPU_DIR/cholesky_tile_tag -size $N -nblocks $T \ 
+                            >> $outfolder/log4_$N\_$T\_$g\GPU.log ; 
+                        fi
+                        #STARPU_SCHED=dmdas $STARPU_BUILD_DIR/examples/lu/lu_example_double -size $((24000)) -nblocks 12; done
+                    done
+                    if [ $method -eq -1 ] || [ $method -eq 6 ]; then 
+                        $timeoutcmd $MPI_HOME/bin/mpirun -n $g ./chol_slate \
+                        -n=$N -b=$B -runs=$runs \ 
+                        >> $outfolder/log5_$N\_$T\_$g\GPU.log ; 
+                    fi
                 fi
                 export CUDA_VISIBLE_DEVICES="$CUDA_VISIBLE_DEVICES,$g"
             done
         else 
-            if [ $method -eq -1 ] || [ $method -eq 1 ]; then $timeoutcmd $MPI_HOME/bin/mpirun -n 1 $MCUDAGRAPH_DIR/chol_partg -N=$N $verb -run=$runs ; fi
-            if [ $method -eq -1 ] || [ $method -eq 2 ]; then $timeoutcmd $MPI_HOME/bin/mpirun -n 1 $MCUDAGRAPH_DIR/chol_partg -N=$N -T=$T -tiled $verb -workspace=$workspace -sm=$sm_count -run=$runs ; fi
-            if [ $method -eq -1 ] || [ $method -eq 3 ]; then $timeoutcmd $MPI_HOME/bin/mpirun -n $gpu_count $MCUDAGRAPH_DIR/chol_partg -N=$N -T=$T -subgraph $verb -workspace=$workspace -sm=$sm_count -run=$runs ; fi
+            echo "NEED TO IMPLEMENT THIS"
+            # if [ $method -eq -1 ] || [ $method -eq 1 ]; then $timeoutcmd $MPI_HOME/bin/mpirun -n 1 $MCUDAGRAPH_DIR/chol_partg -N=$N $verb -run=$runs ; fi
+            # if [ $method -eq -1 ] || [ $method -eq 2 ]; then $timeoutcmd $MPI_HOME/bin/mpirun -n 1 $MCUDAGRAPH_DIR/chol_partg -N=$N -T=$T -tiled $verb -workspace=$workspace -sm=$sm_count -run=$runs ; fi
+            # if [ $method -eq -1 ] || [ $method -eq 3 ]; then $timeoutcmd $MPI_HOME/bin/mpirun -n $gpu_count $MCUDAGRAPH_DIR/chol_partg -N=$N -T=$T -subgraph $verb -workspace=$workspace -sm=$sm_count -run=$runs ; fi
             
-            export CUDA_VISIBLE_DEVICES="0"
-            for ((g = 1 ; g < $gpu_count ; g++ )); do
-                export CUDA_VISIBLE_DEVICES="$CUDA_VISIBLE_DEVICES,$g"
-            done
-            echo "$CUDA_VISIBLE_DEVICES"
+            # export CUDA_VISIBLE_DEVICES="0"
+            # for ((g = 1 ; g < $gpu_count ; g++ )); do
+            #     export CUDA_VISIBLE_DEVICES="$CUDA_VISIBLE_DEVICES,$g"
+            # done
+            # echo "$CUDA_VISIBLE_DEVICES"
 
-            B=$(( N / T ))
-            echo $B
-            if [ $method -eq -1 ] || [ $method -eq 4 ]; then $timeoutcmd $MG_SAMPLES_DIR/cusolver_MgPotrf_example1 -N=$N -B=$B -r=$runs ; fi    
+            # B=$(( N / T ))
+            # echo $B
+            # if [ $method -eq -1 ] || [ $method -eq 4 ]; then $timeoutcmd $MG_SAMPLES_DIR/cusolver_MgPotrf_example1 -N=$N -B=$B -r=$runs ; fi    
                 
             # for ((i = 0 ; i < $runs ; i++ )); do
             #     if [ $method -eq -1 ] || [ $method -eq 5 ]; then STARPU_SCHED=dmdas $STARPU_BUILD_DIR/examples/lu/lu_example_double -size $(($N)) -nblocks $TS ; fi
