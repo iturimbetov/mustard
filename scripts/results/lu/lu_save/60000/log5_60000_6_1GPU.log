@@ -1,3 +1,0 @@
-device getrf n 60000, nb 10000, p-by-q 1-by-1, residual 4.73e-21, tol 2.22e-16, time 198.8977 sec, pass
-device getrf n 60000, nb 10000, p-by-q 1-by-1, residual 8.11e-21, tol 2.22e-16, time 216.9940 sec, pass
-device getrf n 60000, nb 10000, p-by-q 1-by-1, residual 9.04e-21, tol 2.22e-16, time 293.3211 sec, pass
