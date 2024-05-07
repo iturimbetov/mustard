@@ -1,0 +1,39 @@
+SUBGRAPH with N=72000 (8 of 9000x9000 tiles)
+SM Limit per kernel = 100
+cuBLAS workspace = 2048 kB
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+device 1 | 0 run | time (s): 2.7569
+device 0 | 0 run | time (s): 2.7850
+device 2 | 0 run | time (s): 2.7763
+device 3 | 0 run | time (s): 2.7670
+device 1 | 1 run | time (s): 2.6107
+device 2 | 1 run | time (s): 2.6117
+device 3 | 1 run | time (s): 2.5964
+device 0 | 1 run | time (s): 2.6221
+device 3 | 2 run | time (s): 3.0385
+device 2 | 2 run | time (s): 3.0385
+device 0 | 2 run | time (s): 3.0450
+device 1 | 2 run | time (s): 3.0260
+device 1 | 3 run | time (s): 3.2410
+device 0 | 3 run | time (s): 3.2430
+device 2 | 3 run | time (s): 3.2368
+device 3 | 3 run | time (s): 3.2388
+device 3 | 4 run | time (s): 2.7768
+device 1 | 4 run | time (s): 2.7680
+device 0 | 4 run | time (s): 2.7863
+device 2 | 4 run | time (s): 2.7584
+device 1 | 5 run | time (s): 3.0733
+device 0 | 5 run | time (s): 3.0842
+device 3 | 5 run | time (s): 3.0648
+device 2 | 5 run | time (s): 3.0648
+device 2 | 6 run | time (s): 2.6710
+device 0 | 6 run | time (s): 2.6928
+device 3 | 6 run | time (s): 2.6678
+device 1 | 6 run | time (s): 2.6780
+device 2 | 7 run | time (s): 2.7555
+device 3 | 7 run | time (s): 2.7621
+device 0 | 7 run | time (s): 2.7746
+device 1 | 7 run | time (s): 2.7490

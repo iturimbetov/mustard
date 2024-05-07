@@ -1,0 +1,45 @@
+SUBGRAPH with N=60000 (6 of 10000x10000 tiles)
+SM Limit per kernel = 100
+cuBLAS workspace = 25600 kB
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+PE 0. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 1. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 0. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 1. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 0. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 1. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 0. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 1. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 0. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 0. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 1. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 1. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+device 1 | 0 run | time (s): 4.6955
+device 0 | 0 run | time (s): 4.7485
+device 1 | 1 run | time (s): 4.6588
+device 0 | 1 run | time (s): 4.7058
+device 1 | 2 run | time (s): 4.6662
+device 0 | 2 run | time (s): 4.7156
+device 1 | 3 run | time (s): 4.7603
+device 0 | 3 run | time (s): 4.7633
+device 1 | 4 run | time (s): 4.6605
+device 0 | 4 run | time (s): 4.7290
+device 0 | 5 run | time (s): 4.7346
+device 1 | 5 run | time (s): 4.6721
+device 0 | 6 run | time (s): 4.7282
+device 1 | 6 run | time (s): 4.6746
+device 0 | 7 run | time (s): 4.7239
+device 1 | 7 run | time (s): 4.6650
+device 0 | 8 run | time (s): 4.7275
+device 1 | 8 run | time (s): 4.6725
+device 1 | 9 run | time (s): 4.7102
+device 0 | 9 run | time (s): 4.7720
+device 0 | 10 run | time (s): 4.7329
+device 1 | 10 run | time (s): 4.6799
+Total time used (s): 51.5157
+Total time used (s): 52.0811

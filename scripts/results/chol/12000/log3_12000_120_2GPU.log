@@ -1,0 +1,29 @@
+Test 1D Laplacian of order 12000
+Step 1: Create Mg handle and select devices 
+	There are 2 GPUs 
+	Device 0, NVIDIA A100-SXM4-80GB, cc 8.0 
+	Device 1, NVIDIA A100-SXM4-80GB, cc 8.0 
+step 2: Enable peer access.
+	 Enable peer access from gpu 0 to gpu 1
+	 Enable peer access from gpu 1 to gpu 0
+Step 3: Allocate host memory A 
+Step 4: Prepare 1D Laplacian for A and X = ones(N,NRHS) 
+Step 6: Create matrix descriptors for A and D 
+Step 7: Allocate distributed matrices A and B 
+Step 8: Prepare data on devices 
+Step 9: Allocate workspace space 
+	Allocate device workspace, lwork = 1200028 
+Step 10: Solve A*X = B by POTRF and POTRS 
+Run 0 time used (s): 0.2395
+Run 1 time used (s): 0.2196
+Run 2 time used (s): 0.2190
+Run 3 time used (s): 0.2183
+Run 4 time used (s): 0.2175
+Run 5 time used (s): 0.2175
+Run 6 time used (s): 0.2192
+Run 7 time used (s): 0.2177
+Run 8 time used (s): 0.2177
+Run 9 time used (s): 0.2173
+Run 10 time used (s): 0.2173
+Total time used (s): 2.4205
+step 12: Free resources 

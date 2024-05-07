@@ -1,0 +1,123 @@
+SUBGRAPH with N=24000 (6 of 4000x4000 tiles)
+SM Limit per kernel = 100
+cuBLAS workspace = 16 kB
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+device 7 | 0 run | time (s): 0.1727
+device 1 | 0 run | time (s): 0.1727
+device 5 | 0 run | time (s): 0.1747
+device 3 | 0 run | time (s): 0.1616
+device 0 | 0 run | time (s): 0.1645
+device 6 | 0 run | time (s): 0.1713
+device 4 | 0 run | time (s): 0.1596
+device 2 | 0 run | time (s): 0.1606
+device 7 | 1 run | time (s): 0.1943
+device 6 | 1 run | time (s): 0.1943
+device 1 | 1 run | time (s): 0.1774
+device 0 | 1 run | time (s): 0.1973
+device 4 | 1 run | time (s): 0.1827
+device 5 | 1 run | time (s): 0.1774
+device 3 | 1 run | time (s): 0.1827
+device 2 | 1 run | time (s): 0.1764
+device 7 | 2 run | time (s): 0.1822
+device 5 | 2 run | time (s): 0.1838
+device 1 | 2 run | time (s): 0.2008
+device 3 | 2 run | time (s): 0.1784
+device 4 | 2 run | time (s): 0.1764
+device 2 | 2 run | time (s): 0.1674
+device 0 | 2 run | time (s): 0.1868
+device 6 | 2 run | time (s): 0.1660
+device 3 | 3 run | time (s): 0.1903
+device 2 | 3 run | time (s): 0.1903
+device 7 | 3 run | time (s): 0.1780
+device 6 | 3 run | time (s): 0.1780
+device 0 | 3 run | time (s): 0.1720
+device 4 | 3 run | time (s): 0.1790
+device 5 | 3 run | time (s): 0.1790
+device 1 | 3 run | time (s): 0.1790
+device 7 | 4 run | time (s): 0.1714
+device 1 | 4 run | time (s): 0.1734
+device 6 | 4 run | time (s): 0.1714
+device 0 | 4 run | time (s): 0.1814
+device 4 | 4 run | time (s): 0.1593
+device 5 | 4 run | time (s): 0.1583
+device 3 | 4 run | time (s): 0.1483
+device 2 | 4 run | time (s): 0.1563
+device 1 | 5 run | time (s): 0.1660
+device 3 | 5 run | time (s): 0.1660
+device 2 | 5 run | time (s): 0.1760
+device 6 | 5 run | time (s): 0.1760
+device 7 | 5 run | time (s): 0.1751
+device 0 | 5 run | time (s): 0.1798
+device 4 | 5 run | time (s): 0.1751
+device 5 | 5 run | time (s): 0.1751
+device 3 | 6 run | time (s): 0.1697
+device 2 | 6 run | time (s): 0.1793
+device 6 | 6 run | time (s): 0.1853
+device 0 | 6 run | time (s): 0.1830
+device 1 | 6 run | time (s): 0.1697
+device 5 | 6 run | time (s): 0.1630
+device 7 | 6 run | time (s): 0.1593
+device 4 | 6 run | time (s): 0.1660
+device 1 | 7 run | time (s): 0.1731
+device 3 | 7 run | time (s): 0.1830
+device 4 | 7 run | time (s): 0.1681
+device 6 | 7 run | time (s): 0.1760
+device 0 | 7 run | time (s): 0.1756
+device 7 | 7 run | time (s): 0.1731
+device 5 | 7 run | time (s): 0.1731
+device 2 | 7 run | time (s): 0.1731
+device 2 | 8 run | time (s): 0.1961
+device 1 | 8 run | time (s): 0.1961
+device 6 | 8 run | time (s): 0.1746
+device 4 | 8 run | time (s): 0.1760
+device 5 | 8 run | time (s): 0.1961
+device 0 | 8 run | time (s): 0.1784
+device 3 | 8 run | time (s): 0.1746
+device 7 | 8 run | time (s): 0.1660
+device 2 | 9 run | time (s): 0.1660
+device 3 | 9 run | time (s): 0.1834
+device 5 | 9 run | time (s): 0.1844
+device 0 | 9 run | time (s): 0.1864
+device 4 | 9 run | time (s): 0.1727
+device 7 | 9 run | time (s): 0.1781
+device 6 | 9 run | time (s): 0.1781
+device 1 | 9 run | time (s): 0.1781
+device 3 | 10 run | time (s): 0.1797
+device 1 | 10 run | time (s): 0.1779
+device 2 | 10 run | time (s): 0.1797
+device 6 | 10 run | time (s): 0.1900
+device 7 | 10 run | time (s): 0.2018
+device 5 | 10 run | time (s): 0.1918
+device 4 | 10 run | time (s): 0.1918
+device 0 | 10 run | time (s): 0.1843
+Total time used (s): 1.9640
+Total time used (s): 1.9176
+Total time used (s): 1.9610
+Total time used (s): 1.9896
+Total time used (s): 1.9565
+Total time used (s): 1.9211
+Total time used (s): 1.9067
+Total time used (s): 1.9522

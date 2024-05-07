@@ -1,0 +1,55 @@
+SUBGRAPH with N=48000 (6 of 8000x8000 tiles)
+SM Limit per kernel = 100
+cuBLAS workspace = 2048 kB
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+device 1 | 0 run | time (s): 0.9159
+device 2 | 0 run | time (s): 0.9220
+device 0 | 0 run | time (s): 0.9390
+device 3 | 0 run | time (s): 0.9259
+device 3 | 1 run | time (s): 0.9760
+device 1 | 1 run | time (s): 0.9750
+device 0 | 1 run | time (s): 0.9740
+device 2 | 1 run | time (s): 0.9593
+device 2 | 2 run | time (s): 0.8858
+device 1 | 2 run | time (s): 0.8848
+device 3 | 2 run | time (s): 0.8600
+device 0 | 2 run | time (s): 0.8911
+device 1 | 3 run | time (s): 0.9613
+device 3 | 3 run | time (s): 0.9613
+device 0 | 3 run | time (s): 0.9650
+device 2 | 3 run | time (s): 0.9530
+device 2 | 4 run | time (s): 0.9578
+device 0 | 4 run | time (s): 0.9635
+device 1 | 4 run | time (s): 0.9408
+device 3 | 4 run | time (s): 0.9526
+device 3 | 5 run | time (s): 0.9827
+device 0 | 5 run | time (s): 0.9779
+device 1 | 5 run | time (s): 0.9641
+device 2 | 5 run | time (s): 0.9641
+device 2 | 6 run | time (s): 1.0673
+device 0 | 6 run | time (s): 1.0990
+device 3 | 6 run | time (s): 1.0826
+device 1 | 6 run | time (s): 1.0760
+device 1 | 7 run | time (s): 0.9573
+device 3 | 7 run | time (s): 0.9573
+device 2 | 7 run | time (s): 0.9573
+device 0 | 7 run | time (s): 0.9730
+device 1 | 8 run | time (s): 0.9548
+device 0 | 8 run | time (s): 0.9887
+device 3 | 8 run | time (s): 0.9590
+device 2 | 8 run | time (s): 0.9707
+device 0 | 9 run | time (s): 0.9521
+device 1 | 9 run | time (s): 0.9436
+device 2 | 9 run | time (s): 0.9436
+device 3 | 9 run | time (s): 0.9448
+device 1 | 10 run | time (s): 0.8870
+device 0 | 10 run | time (s): 0.9010
+device 3 | 10 run | time (s): 0.8880
+device 2 | 10 run | time (s): 0.8864
+Total time used (s): 10.4674
+Total time used (s): 10.4902
+Total time used (s): 10.6242
+Total time used (s): 10.4606

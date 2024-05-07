@@ -1,0 +1,15 @@
+TILED with N=60000 (8 of 7500x7500 tiles)
+SM Limit per kernel = 100
+cuBLAS workspace = 2048 kB
+device 0 | 0 run | time (s): 4.2005
+device 0 | 1 run | time (s): 4.2249
+device 0 | 2 run | time (s): 4.2321
+device 0 | 3 run | time (s): 4.2468
+device 0 | 4 run | time (s): 4.2452
+device 0 | 5 run | time (s): 4.2411
+device 0 | 6 run | time (s): 4.2333
+device 0 | 7 run | time (s): 4.2335
+device 0 | 8 run | time (s): 4.2385
+device 0 | 9 run | time (s): 4.2387
+device 0 | 10 run | time (s): 4.2375
+Total time used (s): 46.5721

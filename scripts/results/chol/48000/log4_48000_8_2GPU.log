@@ -1,0 +1,90 @@
+BLOCK SIZE = 6000
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from NUMA 0 to CUDA 1 took a very long time (1.075053 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+SIZE = 48000
+# size	ms	GFlop/s
+48000	5768	12782.5
+[starpu][compare_value_and_recalibrate] Current configuration does not match the bus performance model (CUDA: (stored) 1 != (current) 2), recalibrating...
+[starpu][benchmark_all_gpu_devices] CUDA 0...
+[starpu][measure_bandwidth_between_numa_nodes_and_dev] with NUMA 0...
+[starpu][benchmark_all_gpu_devices] CUDA 1...
+[starpu][measure_bandwidth_between_numa_nodes_and_dev] with NUMA 0...
+[starpu][benchmark_all_gpu_devices] CUDA 0 -> 1...
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 1 -> 0
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 0 -> 1
+[starpu][benchmark_all_gpu_devices] CUDA 1 -> 0...
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 0 -> 1
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 1 -> 0
+[starpu][benchmark_all_gpu_devices] OpenCL 0...
+[starpu][measure_bandwidth_between_numa_nodes_and_dev] with NUMA 0...
+[starpu][benchmark_all_gpu_devices] OpenCL 1...
+[starpu][measure_bandwidth_between_numa_nodes_and_dev] with NUMA 0...
+[starpu][compare_value_and_recalibrate] ... done
+[starpu][compare_value_and_recalibrate] Current configuration does not match the bus performance model (OpenCL: (stored) 1 != (current) 2), recalibrating...
+[starpu][compare_value_and_recalibrate] ... done
+BLOCK SIZE = 6000
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from NUMA 0 to CUDA 0 took a very long time (1.467245 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+SIZE = 48000
+# size	ms	GFlop/s
+48000	5877	12545.0
+BLOCK SIZE = 6000
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from NUMA 0 to CUDA 1 took a very long time (1.600373 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+SIZE = 48000
+# size	ms	GFlop/s
+48000	5778	12761.0
+BLOCK SIZE = 6000
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from CUDA 1 to CUDA 0 took a very long time (1.512079 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+SIZE = 48000
+# size	ms	GFlop/s
+48000	5860	12582.1
+BLOCK SIZE = 6000
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from NUMA 0 to CUDA 1 took a very long time (1.498193 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+SIZE = 48000
+# size	ms	GFlop/s
+48000	5776	12764.2
+BLOCK SIZE = 6000
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from NUMA 0 to CUDA 0 took a very long time (0.516944 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+SIZE = 48000
+# size	ms	GFlop/s
+48000	5776	12764.0
+BLOCK SIZE = 6000
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from CUDA 1 to CUDA 0 took a very long time (0.665501 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+SIZE = 48000
+# size	ms	GFlop/s
+48000	5775	12766.8
+BLOCK SIZE = 6000
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from CUDA 1 to CUDA 0 took a very long time (21.796243 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+SIZE = 48000
+# size	ms	GFlop/s
+48000	5787	12740.3
+BLOCK SIZE = 6000
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from CUDA 1 to CUDA 0 took a very long time (2.319704 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+SIZE = 48000
+# size	ms	GFlop/s
+48000	5778	12761.0
+BLOCK SIZE = 6000
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from CUDA 1 to CUDA 0 took a very long time (41.283842 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+SIZE = 48000
+# size	ms	GFlop/s
+48000	5736	12852.6
+BLOCK SIZE = 6000
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from NUMA 0 to CUDA 0 took a very long time (1.466744 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+SIZE = 48000
+# size	ms	GFlop/s
+48000	5778	12760.1
+BLOCK SIZE = 6000
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from CUDA 1 to CUDA 0 took a very long time (2.319143 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+SIZE = 48000
+# size	ms	GFlop/s
+48000	5774	12769.2

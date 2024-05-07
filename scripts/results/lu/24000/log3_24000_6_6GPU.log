@@ -1,0 +1,62 @@
+timeout: the monitored command dumped core
+Test 1D Laplacian of order 24000
+Step 1: Create Mg handle and select devices 
+	There are 6 GPUs 
+	Device 0, NVIDIA A100-SXM4-80GB, cc 8.0 
+	Device 1, NVIDIA A100-SXM4-80GB, cc 8.0 
+	Device 2, NVIDIA A100-SXM4-80GB, cc 8.0 
+	Device 3, NVIDIA A100-SXM4-80GB, cc 8.0 
+	Device 4, NVIDIA A100-SXM4-80GB, cc 8.0 
+	Device 5, NVIDIA A100-SXM4-80GB, cc 8.0 
+step 2: Enable peer access.
+	 Enable peer access from gpu 0 to gpu 1
+	 Enable peer access from gpu 0 to gpu 2
+	 Enable peer access from gpu 0 to gpu 3
+	 Enable peer access from gpu 0 to gpu 4
+	 Enable peer access from gpu 0 to gpu 5
+	 Enable peer access from gpu 1 to gpu 0
+	 Enable peer access from gpu 1 to gpu 2
+	 Enable peer access from gpu 1 to gpu 3
+	 Enable peer access from gpu 1 to gpu 4
+	 Enable peer access from gpu 1 to gpu 5
+	 Enable peer access from gpu 2 to gpu 0
+	 Enable peer access from gpu 2 to gpu 1
+	 Enable peer access from gpu 2 to gpu 3
+	 Enable peer access from gpu 2 to gpu 4
+	 Enable peer access from gpu 2 to gpu 5
+	 Enable peer access from gpu 3 to gpu 0
+	 Enable peer access from gpu 3 to gpu 1
+	 Enable peer access from gpu 3 to gpu 2
+	 Enable peer access from gpu 3 to gpu 4
+	 Enable peer access from gpu 3 to gpu 5
+	 Enable peer access from gpu 4 to gpu 0
+	 Enable peer access from gpu 4 to gpu 1
+	 Enable peer access from gpu 4 to gpu 2
+	 Enable peer access from gpu 4 to gpu 3
+	 Enable peer access from gpu 4 to gpu 5
+	 Enable peer access from gpu 5 to gpu 0
+	 Enable peer access from gpu 5 to gpu 1
+	 Enable peer access from gpu 5 to gpu 2
+	 Enable peer access from gpu 5 to gpu 3
+	 Enable peer access from gpu 5 to gpu 4
+Step 3: Allocate host memory A 
+Step 4: Prepare 1D Laplacian 
+Step 5: Create matrix descriptors for A and B 
+Step 6: Allocate distributed matrices A and D 
+Step 7: Prepare data on devices 
+Step 8: Allocate workspace space 
+	Allocate device workspace, lwork = 162368 
+Step 9: Solve A*X = B by GETRF and GETRS 
+Run 0 time used (s): 2.5079
+Run 1 time used (s): 2.4434
+Run 2 time used (s): 2.4796
+Run 3 time used (s): 2.4718
+Run 4 time used (s): 2.4671
+Run 5 time used (s): 2.4700
+Run 6 time used (s): 2.4681
+Run 7 time used (s): 2.4689
+Run 8 time used (s): 2.4704
+Run 9 time used (s): 2.4680
+Run 10 time used (s): 2.4676
+Total time used (s): 27.1829
+step 12: Free resources 

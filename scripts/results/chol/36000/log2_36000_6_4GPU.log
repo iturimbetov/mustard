@@ -1,0 +1,55 @@
+SUBGRAPH with N=36000 (6 of 6000x6000 tiles)
+SM Limit per kernel = 100
+cuBLAS workspace = 2048 kB
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+device 1 | 0 run | time (s): 0.4556
+device 3 | 0 run | time (s): 0.4450
+device 0 | 0 run | time (s): 0.4506
+device 2 | 0 run | time (s): 0.4435
+device 1 | 1 run | time (s): 0.4238
+device 2 | 1 run | time (s): 0.4077
+device 0 | 1 run | time (s): 0.4198
+device 3 | 1 run | time (s): 0.4228
+device 1 | 2 run | time (s): 0.4572
+device 2 | 2 run | time (s): 0.4450
+device 3 | 2 run | time (s): 0.4379
+device 0 | 2 run | time (s): 0.4407
+device 3 | 3 run | time (s): 0.4250
+device 2 | 3 run | time (s): 0.4250
+device 0 | 3 run | time (s): 0.4292
+device 1 | 3 run | time (s): 0.4224
+device 3 | 4 run | time (s): 0.4639
+device 1 | 4 run | time (s): 0.4648
+device 0 | 4 run | time (s): 0.4620
+device 2 | 4 run | time (s): 0.4639
+device 3 | 5 run | time (s): 0.4920
+device 0 | 5 run | time (s): 0.5032
+device 1 | 5 run | time (s): 0.4963
+device 2 | 5 run | time (s): 0.4963
+device 1 | 6 run | time (s): 0.4306
+device 3 | 6 run | time (s): 0.4436
+device 0 | 6 run | time (s): 0.4450
+device 2 | 6 run | time (s): 0.4423
+device 3 | 7 run | time (s): 0.4108
+device 2 | 7 run | time (s): 0.4511
+device 0 | 7 run | time (s): 0.4370
+device 1 | 7 run | time (s): 0.4371
+device 1 | 8 run | time (s): 0.4847
+device 3 | 8 run | time (s): 0.4573
+device 2 | 8 run | time (s): 0.4670
+device 0 | 8 run | time (s): 0.4693
+device 1 | 9 run | time (s): 0.4360
+device 3 | 9 run | time (s): 0.4316
+device 2 | 9 run | time (s): 0.4440
+device 0 | 9 run | time (s): 0.4460
+device 1 | 10 run | time (s): 0.4253
+device 3 | 10 run | time (s): 0.4283
+device 2 | 10 run | time (s): 0.4263
+device 0 | 10 run | time (s): 0.4160
+Total time used (s): 4.9122
+Total time used (s): 4.8583
+Total time used (s): 4.9339
+Total time used (s): 4.9187

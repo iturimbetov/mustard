@@ -1,0 +1,87 @@
+SUBGRAPH with N=36000 (6 of 6000x6000 tiles)
+SM Limit per kernel = 100
+cuBLAS workspace = 25600 kB
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+PE 0. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 0. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 0. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 0. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 0. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 0. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 1. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 2. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 2. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 2. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 1. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 2. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 1. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 2. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 2. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 1. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 1. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 1. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 3. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 3. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 3. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 3. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 3. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+PE 3. Create subgraph with subN=2 (2 of 3000x3000 tiles)
+device 1 | 0 run | time (s): 0.6720
+device 2 | 0 run | time (s): 0.6799
+device 3 | 0 run | time (s): 0.6847
+device 0 | 0 run | time (s): 0.6922
+device 1 | 1 run | time (s): 0.6114
+device 0 | 1 run | time (s): 0.6220
+device 3 | 1 run | time (s): 0.6114
+device 2 | 1 run | time (s): 0.6114
+device 2 | 2 run | time (s): 0.6743
+device 1 | 2 run | time (s): 0.6625
+device 3 | 2 run | time (s): 0.6843
+device 0 | 2 run | time (s): 0.6783
+device 1 | 3 run | time (s): 0.6730
+device 0 | 3 run | time (s): 0.6907
+device 3 | 3 run | time (s): 0.6737
+device 2 | 3 run | time (s): 0.6720
+device 2 | 4 run | time (s): 0.6320
+device 0 | 4 run | time (s): 0.6500
+device 3 | 4 run | time (s): 0.6376
+device 1 | 4 run | time (s): 0.6376
+device 2 | 5 run | time (s): 0.6353
+device 0 | 5 run | time (s): 0.6540
+device 1 | 5 run | time (s): 0.6363
+device 3 | 5 run | time (s): 0.6411
+device 3 | 6 run | time (s): 0.6320
+device 1 | 6 run | time (s): 0.6524
+device 0 | 6 run | time (s): 0.6552
+device 2 | 6 run | time (s): 0.6423
+device 1 | 7 run | time (s): 0.5981
+device 3 | 7 run | time (s): 0.6206
+device 0 | 7 run | time (s): 0.6340
+device 2 | 7 run | time (s): 0.6226
+device 3 | 8 run | time (s): 0.6631
+device 0 | 8 run | time (s): 0.6700
+device 1 | 8 run | time (s): 0.6594
+device 2 | 8 run | time (s): 0.6621
+device 2 | 9 run | time (s): 0.6594
+device 0 | 9 run | time (s): 0.6854
+device 1 | 9 run | time (s): 0.6580
+device 3 | 9 run | time (s): 0.6367
+device 1 | 10 run | time (s): 0.6604
+device 0 | 10 run | time (s): 0.6674
+device 2 | 10 run | time (s): 0.6539
+device 3 | 10 run | time (s): 0.6540
+Total time used (s): 7.1453
+Total time used (s): 7.1392
+Total time used (s): 7.2991
+Total time used (s): 7.1211

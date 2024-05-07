@@ -1,0 +1,33 @@
+SUBGRAPH with N=12000 (6 of 2000x2000 tiles)
+SM Limit per kernel = 100
+cuBLAS workspace = 4 kB
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+device 1 | 0 run | time (s): 0.0880
+device 0 | 0 run | time (s): 0.1009
+device 1 | 1 run | time (s): 0.0897
+device 0 | 1 run | time (s): 0.0766
+device 1 | 2 run | time (s): 0.0848
+device 0 | 2 run | time (s): 0.1069
+device 1 | 3 run | time (s): 0.0782
+device 0 | 3 run | time (s): 0.1050
+device 1 | 4 run | time (s): 0.0853
+device 0 | 4 run | time (s): 0.1012
+device 1 | 5 run | time (s): 0.0880
+device 0 | 5 run | time (s): 0.1034
+device 1 | 6 run | time (s): 0.1017
+device 0 | 6 run | time (s): 0.1030
+device 1 | 7 run | time (s): 0.0888
+device 0 | 7 run | time (s): 0.1016
+device 1 | 8 run | time (s): 0.0880
+device 0 | 8 run | time (s): 0.0993
+device 1 | 9 run | time (s): 0.0870
+device 0 | 9 run | time (s): 0.1198
+device 1 | 10 run | time (s): 0.0902
+device 0 | 10 run | time (s): 0.0939
+Total time used (s): 0.9697
+Total time used (s): 1.1117

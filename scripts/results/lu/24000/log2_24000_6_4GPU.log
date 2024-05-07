@@ -1,0 +1,63 @@
+SUBGRAPH with N=24000 (6 of 4000x4000 tiles)
+SM Limit per kernel = 100
+cuBLAS workspace = 16 kB
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+device 3 | 0 run | time (s): 0.2319
+device 0 | 0 run | time (s): 0.2370
+device 1 | 0 run | time (s): 0.2210
+device 2 | 0 run | time (s): 0.2320
+device 1 | 1 run | time (s): 0.2197
+device 3 | 1 run | time (s): 0.2112
+device 2 | 1 run | time (s): 0.2207
+device 0 | 1 run | time (s): 0.2097
+device 2 | 2 run | time (s): 0.2277
+device 1 | 2 run | time (s): 0.2357
+device 3 | 2 run | time (s): 0.2181
+device 0 | 2 run | time (s): 0.2045
+device 1 | 3 run | time (s): 0.2202
+device 2 | 3 run | time (s): 0.2202
+device 3 | 3 run | time (s): 0.2202
+device 0 | 3 run | time (s): 0.2090
+device 3 | 4 run | time (s): 0.2106
+device 1 | 4 run | time (s): 0.2106
+device 2 | 4 run | time (s): 0.2020
+device 0 | 4 run | time (s): 0.2063
+device 3 | 5 run | time (s): 0.2161
+device 0 | 5 run | time (s): 0.2096
+device 1 | 5 run | time (s): 0.2056
+device 2 | 5 run | time (s): 0.2055
+device 3 | 6 run | time (s): 0.2020
+device 1 | 6 run | time (s): 0.2020
+device 0 | 6 run | time (s): 0.2090
+device 2 | 6 run | time (s): 0.2037
+device 2 | 7 run | time (s): 0.2133
+device 1 | 7 run | time (s): 0.2115
+device 0 | 7 run | time (s): 0.2154
+device 3 | 7 run | time (s): 0.1991
+device 3 | 8 run | time (s): 0.2020
+device 1 | 8 run | time (s): 0.2260
+device 2 | 8 run | time (s): 0.2112
+device 0 | 8 run | time (s): 0.2152
+device 1 | 9 run | time (s): 0.2110
+device 2 | 9 run | time (s): 0.2110
+device 3 | 9 run | time (s): 0.2110
+device 0 | 9 run | time (s): 0.2102
+device 1 | 10 run | time (s): 0.2188
+device 0 | 10 run | time (s): 0.2312
+device 2 | 10 run | time (s): 0.2188
+device 3 | 10 run | time (s): 0.2167
+Total time used (s): 2.3570
+Total time used (s): 2.3661
+Total time used (s): 2.3821
+Total time used (s): 2.3389

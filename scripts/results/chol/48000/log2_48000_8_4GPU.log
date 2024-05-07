@@ -1,0 +1,55 @@
+SUBGRAPH with N=48000 (8 of 6000x6000 tiles)
+SM Limit per kernel = 100
+cuBLAS workspace = 2048 kB
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+device 3 | 0 run | time (s): 1.0384
+device 1 | 0 run | time (s): 1.0420
+device 0 | 0 run | time (s): 1.0600
+device 2 | 0 run | time (s): 1.0360
+device 0 | 1 run | time (s): 1.0481
+device 2 | 1 run | time (s): 1.0410
+device 1 | 1 run | time (s): 1.0354
+device 3 | 1 run | time (s): 1.0410
+device 3 | 2 run | time (s): 0.9830
+device 1 | 2 run | time (s): 0.9984
+device 2 | 2 run | time (s): 0.9994
+device 0 | 2 run | time (s): 0.9938
+device 1 | 3 run | time (s): 0.9163
+device 0 | 3 run | time (s): 0.9340
+device 3 | 3 run | time (s): 0.9163
+device 2 | 3 run | time (s): 0.9063
+device 1 | 4 run | time (s): 0.9580
+device 3 | 4 run | time (s): 0.9616
+device 0 | 4 run | time (s): 0.9550
+device 2 | 4 run | time (s): 0.9510
+device 2 | 5 run | time (s): 1.0443
+device 1 | 5 run | time (s): 1.0444
+device 0 | 5 run | time (s): 1.0400
+device 3 | 5 run | time (s): 1.0386
+device 1 | 6 run | time (s): 0.8893
+device 0 | 6 run | time (s): 0.8840
+device 2 | 6 run | time (s): 0.8791
+device 3 | 6 run | time (s): 0.8791
+device 3 | 7 run | time (s): 0.8937
+device 0 | 7 run | time (s): 0.8970
+device 1 | 7 run | time (s): 0.8753
+device 2 | 7 run | time (s): 0.8840
+device 3 | 8 run | time (s): 0.9410
+device 2 | 8 run | time (s): 0.9220
+device 0 | 8 run | time (s): 0.9291
+device 1 | 8 run | time (s): 0.9221
+device 3 | 9 run | time (s): 0.9625
+device 1 | 9 run | time (s): 0.9580
+device 0 | 9 run | time (s): 0.9628
+device 2 | 9 run | time (s): 0.9558
+device 3 | 10 run | time (s): 0.8938
+device 2 | 10 run | time (s): 0.8958
+device 1 | 10 run | time (s): 0.8870
+device 0 | 10 run | time (s): 0.8983
+Total time used (s): 10.5147
+Total time used (s): 10.5261
+Total time used (s): 10.5489
+Total time used (s): 10.6020

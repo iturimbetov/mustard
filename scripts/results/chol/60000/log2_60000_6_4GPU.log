@@ -1,0 +1,55 @@
+SUBGRAPH with N=60000 (6 of 10000x10000 tiles)
+SM Limit per kernel = 100
+cuBLAS workspace = 2048 kB
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+device 3 | 0 run | time (s): 1.8870
+device 1 | 0 run | time (s): 1.8901
+device 0 | 0 run | time (s): 1.9232
+device 2 | 0 run | time (s): 1.8901
+device 1 | 1 run | time (s): 1.8129
+device 2 | 1 run | time (s): 1.8071
+device 3 | 1 run | time (s): 1.8070
+device 0 | 1 run | time (s): 1.8429
+device 1 | 2 run | time (s): 1.9884
+device 3 | 2 run | time (s): 1.9994
+device 2 | 2 run | time (s): 1.9880
+device 0 | 2 run | time (s): 2.0132
+device 3 | 3 run | time (s): 1.8453
+device 2 | 3 run | time (s): 1.8295
+device 1 | 3 run | time (s): 1.8419
+device 0 | 3 run | time (s): 1.8713
+device 1 | 4 run | time (s): 1.8293
+device 0 | 4 run | time (s): 1.8590
+device 2 | 4 run | time (s): 1.8456
+device 3 | 4 run | time (s): 1.8566
+device 1 | 5 run | time (s): 1.8225
+device 0 | 5 run | time (s): 1.8474
+device 3 | 5 run | time (s): 1.8291
+device 2 | 5 run | time (s): 1.8321
+device 0 | 6 run | time (s): 2.1278
+device 3 | 6 run | time (s): 2.1024
+device 1 | 6 run | time (s): 2.0980
+device 2 | 6 run | time (s): 2.1059
+device 3 | 7 run | time (s): 2.1104
+device 2 | 7 run | time (s): 2.1100
+device 0 | 7 run | time (s): 2.1400
+device 1 | 7 run | time (s): 2.1186
+device 2 | 8 run | time (s): 1.7053
+device 0 | 8 run | time (s): 1.7312
+device 3 | 8 run | time (s): 1.7142
+device 1 | 8 run | time (s): 1.7152
+device 3 | 9 run | time (s): 1.8668
+device 0 | 9 run | time (s): 1.8850
+device 2 | 9 run | time (s): 1.8491
+device 1 | 9 run | time (s): 1.8668
+device 1 | 10 run | time (s): 1.9014
+device 2 | 10 run | time (s): 1.9039
+device 3 | 10 run | time (s): 1.9014
+device 0 | 10 run | time (s): 1.9285
+Total time used (s): 20.8851
+Total time used (s): 20.9197
+Total time used (s): 20.8666
+Total time used (s): 21.1695

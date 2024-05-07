@@ -1,0 +1,55 @@
+SUBGRAPH with N=60000 (8 of 7500x7500 tiles)
+SM Limit per kernel = 100
+cuBLAS workspace = 2048 kB
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+device 3 | 0 run | time (s): 1.4931
+device 1 | 0 run | time (s): 1.4890
+device 0 | 0 run | time (s): 1.4996
+device 2 | 0 run | time (s): 1.4880
+device 0 | 1 run | time (s): 1.6876
+device 1 | 1 run | time (s): 1.6758
+device 3 | 1 run | time (s): 1.6758
+device 2 | 1 run | time (s): 1.6633
+device 0 | 2 run | time (s): 1.6217
+device 3 | 2 run | time (s): 1.6099
+device 2 | 2 run | time (s): 1.6099
+device 1 | 2 run | time (s): 1.6098
+device 0 | 3 run | time (s): 1.7382
+device 3 | 3 run | time (s): 1.7180
+device 1 | 3 run | time (s): 1.7212
+device 2 | 3 run | time (s): 1.7222
+device 3 | 4 run | time (s): 1.6780
+device 2 | 4 run | time (s): 1.6823
+device 0 | 4 run | time (s): 1.6890
+device 1 | 4 run | time (s): 1.6833
+device 2 | 5 run | time (s): 1.7384
+device 1 | 5 run | time (s): 1.7310
+device 0 | 5 run | time (s): 1.7485
+device 3 | 5 run | time (s): 1.7367
+device 0 | 6 run | time (s): 1.6225
+device 2 | 6 run | time (s): 1.6084
+device 3 | 6 run | time (s): 1.6107
+device 1 | 6 run | time (s): 1.6094
+device 2 | 7 run | time (s): 1.6980
+device 0 | 7 run | time (s): 1.7090
+device 3 | 7 run | time (s): 1.6845
+device 1 | 7 run | time (s): 1.6920
+device 3 | 8 run | time (s): 1.6316
+device 1 | 8 run | time (s): 1.6356
+device 2 | 8 run | time (s): 1.6326
+device 0 | 8 run | time (s): 1.6299
+device 3 | 9 run | time (s): 1.9220
+device 2 | 9 run | time (s): 1.9175
+device 0 | 9 run | time (s): 1.9278
+device 1 | 9 run | time (s): 1.9050
+device 2 | 10 run | time (s): 1.6366
+device 3 | 10 run | time (s): 1.6406
+device 0 | 10 run | time (s): 1.6410
+device 1 | 10 run | time (s): 1.6166
+Total time used (s): 18.4009
+Total time used (s): 18.3972
+Total time used (s): 18.3686
+Total time used (s): 18.5149

@@ -1,0 +1,55 @@
+SUBGRAPH with N=12000 (6 of 2000x2000 tiles)
+SM Limit per kernel = 100
+cuBLAS workspace = 2048 kB
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+device 2 | 0 run | time (s): 0.0260
+device 0 | 0 run | time (s): 0.0300
+device 3 | 0 run | time (s): 0.0323
+device 1 | 0 run | time (s): 0.0323
+device 3 | 1 run | time (s): 0.0333
+device 1 | 1 run | time (s): 0.0260
+device 0 | 1 run | time (s): 0.0330
+device 2 | 1 run | time (s): 0.0333
+device 1 | 2 run | time (s): 0.0260
+device 3 | 2 run | time (s): 0.0459
+device 0 | 2 run | time (s): 0.0353
+device 2 | 2 run | time (s): 0.0337
+device 1 | 3 run | time (s): 0.0285
+device 2 | 3 run | time (s): 0.0285
+device 3 | 3 run | time (s): 0.0285
+device 0 | 3 run | time (s): 0.0284
+device 3 | 4 run | time (s): 0.0260
+device 0 | 4 run | time (s): 0.0260
+device 1 | 4 run | time (s): 0.0310
+device 2 | 4 run | time (s): 0.0310
+device 1 | 5 run | time (s): 0.0220
+device 2 | 5 run | time (s): 0.0275
+device 3 | 5 run | time (s): 0.0275
+device 0 | 5 run | time (s): 0.0264
+device 2 | 6 run | time (s): 0.0360
+device 0 | 6 run | time (s): 0.0293
+device 3 | 6 run | time (s): 0.0072
+device 1 | 6 run | time (s): 0.0282
+device 2 | 7 run | time (s): 0.0360
+device 3 | 7 run | time (s): 0.0297
+device 1 | 7 run | time (s): 0.0260
+device 0 | 7 run | time (s): 0.0238
+device 1 | 8 run | time (s): 0.0360
+device 0 | 8 run | time (s): 0.0400
+device 3 | 8 run | time (s): 0.0292
+device 2 | 8 run | time (s): 0.0092
+device 1 | 9 run | time (s): 0.0272
+device 2 | 9 run | time (s): 0.0409
+device 0 | 9 run | time (s): 0.0419
+device 3 | 9 run | time (s): 0.0310
+device 1 | 10 run | time (s): 0.0275
+device 3 | 10 run | time (s): 0.0260
+device 2 | 10 run | time (s): 0.0394
+device 0 | 10 run | time (s): 0.0302
+Total time used (s): 0.3413
+Total time used (s): 0.3164
+Total time used (s): 0.3106
+Total time used (s): 0.3442

@@ -1,0 +1,46 @@
+[starpu][compare_value_and_recalibrate] Current configuration does not match the bus performance model (CUDA: (stored) 8 != (current) 1), recalibrating...
+[starpu][benchmark_all_gpu_devices] CUDA 0...
+[starpu][measure_bandwidth_between_numa_nodes_and_dev] with NUMA 0...
+[starpu][benchmark_all_gpu_devices] OpenCL 0...
+[starpu][measure_bandwidth_between_numa_nodes_and_dev] with NUMA 0...
+[starpu][compare_value_and_recalibrate] ... done
+[starpu][compare_value_and_recalibrate] Current configuration does not match the bus performance model (OpenCL: (stored) 8 != (current) 1), recalibrating...
+[starpu][compare_value_and_recalibrate] ... done
+MATRIX GENERATED
+[starpu][_starpu_history_based_job_expected_perf] Warning: model starpu_dlu_lu_model_11_openblas is not calibrated enough for cuda0_impl0 (Comb0) size 128000000 footprint 40ccae41 (only 0 measurements), forcing calibration for this run. Use the STARPU_CALIBRATE environment variable to control this. You probably need to run again to continue calibrating the model, until this warning disappears.
+[starpu][_starpu_history_based_job_expected_perf] Warning: model starpu_dlu_lu_model_12_openblas is not calibrated enough for cuda0_impl0 (Comb0) size 256000000 footprint b30c66e3 (only 0 measurements), forcing calibration for this run. Use the STARPU_CALIBRATE environment variable to control this. You probably need to run again to continue calibrating the model, until this warning disappears.
+[starpu][_starpu_history_based_job_expected_perf] Warning: model starpu_dlu_lu_model_21_openblas is not calibrated enough for cuda0_impl0 (Comb0) size 256000000 footprint b30c66e3 (only 0 measurements), forcing calibration for this run. Use the STARPU_CALIBRATE environment variable to control this. You probably need to run again to continue calibrating the model, until this warning disappears.
+[starpu][_starpu_history_based_job_expected_perf] Warning: model starpu_dlu_lu_model_22_openblas is not calibrated enough for cuda0_impl0 (Comb0) size 384000000 footprint 4fb74522 (only 0 measurements), forcing calibration for this run. Use the STARPU_CALIBRATE environment variable to control this. You probably need to run again to continue calibrating the model, until this warning disappears.
+# size	ms	GFlop/s
+24000	2746	3355.6
+MATRIX GENERATED
+[starpu][_starpu_history_based_job_expected_perf] Warning: model starpu_dlu_lu_model_11_openblas is not calibrated enough for cuda0_impl0 (Comb0) size 128000000 footprint 40ccae41 (only 5 measurements), forcing calibration for this run. Use the STARPU_CALIBRATE environment variable to control this. You probably need to run again to continue calibrating the model, until this warning disappears.
+# size	ms	GFlop/s
+24000	2747	3354.6
+MATRIX GENERATED
+# size	ms	GFlop/s
+24000	2746	3356.3
+MATRIX GENERATED
+# size	ms	GFlop/s
+24000	2744	3358.6
+MATRIX GENERATED
+# size	ms	GFlop/s
+24000	2741	3362.4
+MATRIX GENERATED
+# size	ms	GFlop/s
+24000	2738	3365.7
+MATRIX GENERATED
+# size	ms	GFlop/s
+24000	2737	3367.3
+MATRIX GENERATED
+# size	ms	GFlop/s
+24000	2748	3353.1
+MATRIX GENERATED
+# size	ms	GFlop/s
+24000	2747	3355.5
+MATRIX GENERATED
+# size	ms	GFlop/s
+24000	2743	3359.4
+MATRIX GENERATED
+# size	ms	GFlop/s
+24000	2744	3359.0

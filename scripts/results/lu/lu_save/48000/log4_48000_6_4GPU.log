@@ -1,0 +1,111 @@
+[starpu][compare_value_and_recalibrate] Current configuration does not match the bus performance model (CUDA: (stored) 2 != (current) 4), recalibrating...
+[starpu][benchmark_all_gpu_devices] CUDA 0...
+[starpu][measure_bandwidth_between_numa_nodes_and_dev] with NUMA 0...
+[starpu][benchmark_all_gpu_devices] CUDA 1...
+[starpu][measure_bandwidth_between_numa_nodes_and_dev] with NUMA 0...
+[starpu][benchmark_all_gpu_devices] CUDA 2...
+[starpu][measure_bandwidth_between_numa_nodes_and_dev] with NUMA 0...
+[starpu][benchmark_all_gpu_devices] CUDA 3...
+[starpu][measure_bandwidth_between_numa_nodes_and_dev] with NUMA 0...
+[starpu][benchmark_all_gpu_devices] CUDA 0 -> 1...
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 1 -> 0
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 0 -> 1
+[starpu][benchmark_all_gpu_devices] CUDA 0 -> 2...
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 2 -> 0
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 0 -> 2
+[starpu][benchmark_all_gpu_devices] CUDA 0 -> 3...
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 3 -> 0
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 0 -> 3
+[starpu][benchmark_all_gpu_devices] CUDA 1 -> 0...
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 0 -> 1
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 1 -> 0
+[starpu][benchmark_all_gpu_devices] CUDA 1 -> 2...
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 2 -> 1
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 1 -> 2
+[starpu][benchmark_all_gpu_devices] CUDA 1 -> 3...
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 3 -> 1
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 1 -> 3
+[starpu][benchmark_all_gpu_devices] CUDA 2 -> 0...
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 0 -> 2
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 2 -> 0
+[starpu][benchmark_all_gpu_devices] CUDA 2 -> 1...
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 1 -> 2
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 2 -> 1
+[starpu][benchmark_all_gpu_devices] CUDA 2 -> 3...
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 3 -> 2
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 2 -> 3
+[starpu][benchmark_all_gpu_devices] CUDA 3 -> 0...
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 0 -> 3
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 3 -> 0
+[starpu][benchmark_all_gpu_devices] CUDA 3 -> 1...
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 1 -> 3
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 3 -> 1
+[starpu][benchmark_all_gpu_devices] CUDA 3 -> 2...
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 2 -> 3
+[starpu][measure_bandwidth_between_dev_and_dev_cuda] GPU-Direct 3 -> 2
+[starpu][benchmark_all_gpu_devices] OpenCL 0...
+[starpu][measure_bandwidth_between_numa_nodes_and_dev] with NUMA 0...
+[starpu][benchmark_all_gpu_devices] OpenCL 1...
+[starpu][measure_bandwidth_between_numa_nodes_and_dev] with NUMA 0...
+[starpu][benchmark_all_gpu_devices] OpenCL 2...
+[starpu][measure_bandwidth_between_numa_nodes_and_dev] with NUMA 0...
+[starpu][benchmark_all_gpu_devices] OpenCL 3...
+[starpu][measure_bandwidth_between_numa_nodes_and_dev] with NUMA 0...
+[starpu][compare_value_and_recalibrate] ... done
+[starpu][compare_value_and_recalibrate] Current configuration does not match the bus performance model (OpenCL: (stored) 2 != (current) 4), recalibrating...
+[starpu][compare_value_and_recalibrate] ... done
+MATRIX GENERATED
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from CUDA 3 to CUDA 2 took a very long time (0.926647 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+# size	ms	GFlop/s
+48000	15248	4835.4
+MATRIX GENERATED
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from CUDA 3 to CUDA 2 took a very long time (2.376660 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+# size	ms	GFlop/s
+48000	15186	4854.9
+MATRIX GENERATED
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from NUMA 0 to CUDA 0 took a very long time (0.485294 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+# size	ms	GFlop/s
+48000	15192	4853.1
+MATRIX GENERATED
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from NUMA 0 to CUDA 2 took a very long time (0.507165 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+# size	ms	GFlop/s
+48000	15213	4846.5
+MATRIX GENERATED
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from CUDA 3 to CUDA 1 took a very long time (0.497988 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+# size	ms	GFlop/s
+48000	15238	4838.5
+MATRIX GENERATED
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from CUDA 3 to CUDA 0 took a very long time (0.492990 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+# size	ms	GFlop/s
+48000	15156	4864.7
+MATRIX GENERATED
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from NUMA 0 to CUDA 3 took a very long time (0.685477 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+# size	ms	GFlop/s
+48000	15260	4831.6
+MATRIX GENERATED
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from CUDA 3 to CUDA 1 took a very long time (0.493349 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+# size	ms	GFlop/s
+48000	15118	4876.7
+MATRIX GENERATED
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from CUDA 3 to CUDA 1 took a very long time (1.772454 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+# size	ms	GFlop/s
+48000	15190	4853.8
+MATRIX GENERATED
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from CUDA 3 to CUDA 2 took a very long time (0.501935 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+# size	ms	GFlop/s
+48000	15157	4864.1
+MATRIX GENERATED
+[starpu][starpu_interface_end_driver_copy_async] Warning: the submission of asynchronous transfer from NUMA 0 to CUDA 0 took a very long time (0.490153 ms)
+For proper asynchronous transfer overlapping, data registered to StarPU must be allocated with starpu_malloc() or pinned with starpu_memory_pin()
+# size	ms	GFlop/s
+48000	15225	4842.5

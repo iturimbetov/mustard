@@ -1,0 +1,13 @@
+Single-kernel with N=72000 (1 of 72000x72000 tiles)
+device 0 | 0 run | time (s): 14.0314
+device 0 | 1 run | time (s): 13.9619
+device 0 | 2 run | time (s): 13.9605
+device 0 | 3 run | time (s): 13.9474
+device 0 | 4 run | time (s): 13.9514
+device 0 | 5 run | time (s): 13.9152
+device 0 | 6 run | time (s): 13.9058
+device 0 | 7 run | time (s): 13.9133
+device 0 | 8 run | time (s): 13.9370
+device 0 | 9 run | time (s): 13.9275
+device 0 | 10 run | time (s): 13.9314
+Total time used (s): 153.3828

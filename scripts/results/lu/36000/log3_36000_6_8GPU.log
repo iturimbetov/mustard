@@ -1,0 +1,93 @@
+timeout: the monitored command dumped core
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  cusolver error
+timeout: the monitored command dumped core
+Test 1D Laplacian of order 36000
+Step 1: Create Mg handle and select devices 
+	There are 8 GPUs 
+	Device 0, NVIDIA A100-SXM4-80GB, cc 8.0 
+	Device 1, NVIDIA A100-SXM4-80GB, cc 8.0 
+	Device 2, NVIDIA A100-SXM4-80GB, cc 8.0 
+	Device 3, NVIDIA A100-SXM4-80GB, cc 8.0 
+	Device 4, NVIDIA A100-SXM4-80GB, cc 8.0 
+	Device 5, NVIDIA A100-SXM4-80GB, cc 8.0 
+	Device 6, NVIDIA A100-SXM4-80GB, cc 8.0 
+	Device 7, NVIDIA A100-SXM4-80GB, cc 8.0 
+step 2: Enable peer access.
+	 Enable peer access from gpu 0 to gpu 1
+	 Enable peer access from gpu 0 to gpu 2
+	 Enable peer access from gpu 0 to gpu 3
+	 Enable peer access from gpu 0 to gpu 4
+	 Enable peer access from gpu 0 to gpu 5
+	 Enable peer access from gpu 0 to gpu 6
+	 Enable peer access from gpu 0 to gpu 7
+	 Enable peer access from gpu 1 to gpu 0
+	 Enable peer access from gpu 1 to gpu 2
+	 Enable peer access from gpu 1 to gpu 3
+	 Enable peer access from gpu 1 to gpu 4
+	 Enable peer access from gpu 1 to gpu 5
+	 Enable peer access from gpu 1 to gpu 6
+	 Enable peer access from gpu 1 to gpu 7
+	 Enable peer access from gpu 2 to gpu 0
+	 Enable peer access from gpu 2 to gpu 1
+	 Enable peer access from gpu 2 to gpu 3
+	 Enable peer access from gpu 2 to gpu 4
+	 Enable peer access from gpu 2 to gpu 5
+	 Enable peer access from gpu 2 to gpu 6
+	 Enable peer access from gpu 2 to gpu 7
+	 Enable peer access from gpu 3 to gpu 0
+	 Enable peer access from gpu 3 to gpu 1
+	 Enable peer access from gpu 3 to gpu 2
+	 Enable peer access from gpu 3 to gpu 4
+	 Enable peer access from gpu 3 to gpu 5
+	 Enable peer access from gpu 3 to gpu 6
+	 Enable peer access from gpu 3 to gpu 7
+	 Enable peer access from gpu 4 to gpu 0
+	 Enable peer access from gpu 4 to gpu 1
+	 Enable peer access from gpu 4 to gpu 2
+	 Enable peer access from gpu 4 to gpu 3
+	 Enable peer access from gpu 4 to gpu 5
+	 Enable peer access from gpu 4 to gpu 6
+	 Enable peer access from gpu 4 to gpu 7
+	 Enable peer access from gpu 5 to gpu 0
+	 Enable peer access from gpu 5 to gpu 1
+	 Enable peer access from gpu 5 to gpu 2
+	 Enable peer access from gpu 5 to gpu 3
+	 Enable peer access from gpu 5 to gpu 4
+	 Enable peer access from gpu 5 to gpu 6
+	 Enable peer access from gpu 5 to gpu 7
+	 Enable peer access from gpu 6 to gpu 0
+	 Enable peer access from gpu 6 to gpu 1
+	 Enable peer access from gpu 6 to gpu 2
+	 Enable peer access from gpu 6 to gpu 3
+	 Enable peer access from gpu 6 to gpu 4
+	 Enable peer access from gpu 6 to gpu 5
+	 Enable peer access from gpu 6 to gpu 7
+	 Enable peer access from gpu 7 to gpu 0
+	 Enable peer access from gpu 7 to gpu 1
+	 Enable peer access from gpu 7 to gpu 2
+	 Enable peer access from gpu 7 to gpu 3
+	 Enable peer access from gpu 7 to gpu 4
+	 Enable peer access from gpu 7 to gpu 5
+	 Enable peer access from gpu 7 to gpu 6
+Step 3: Allocate host memory A 
+Step 4: Prepare 1D Laplacian 
+Step 5: Create matrix descriptors for A and B 
+Step 6: Allocate distributed matrices A and D 
+Step 7: Prepare data on devices 
+Step 8: Allocate workspace space 
+	Allocate device workspace, lwork = 238400 
+Step 9: Solve A*X = B by GETRF and GETRS 
+Run 0 time used (s): 5.8210
+Run 1 time used (s): 5.7846
+Run 2 time used (s): 5.7745
+Run 3 time used (s): 5.7707
+Run 4 time used (s): 5.7756
+Run 5 time used (s): 5.7710
+Run 6 time used (s): 5.7682
+Run 7 time used (s): 5.7598
+Run 8 time used (s): 5.7666
+Run 9 time used (s): 5.7624
+Run 10 time used (s): 5.7623
+Total time used (s): 63.5167
+step 12: Free resources 

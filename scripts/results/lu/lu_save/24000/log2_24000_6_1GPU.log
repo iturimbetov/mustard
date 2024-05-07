@@ -1,0 +1,18 @@
+SUBGRAPH with N=24000 (6 of 4000x4000 tiles)
+SM Limit per kernel = 100
+cuBLAS workspace = 16 kB
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+device 0 | 0 run | time (s): 0.5921
+device 0 | 1 run | time (s): 0.5915
+device 0 | 2 run | time (s): 0.6000
+device 0 | 3 run | time (s): 0.5992
+device 0 | 4 run | time (s): 0.5949
+device 0 | 5 run | time (s): 0.5949
+device 0 | 6 run | time (s): 0.5943
+device 0 | 7 run | time (s): 0.6090
+device 0 | 8 run | time (s): 0.5939
+device 0 | 9 run | time (s): 0.6047
+device 0 | 10 run | time (s): 0.6057
+Total time used (s): 6.5802

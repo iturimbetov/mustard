@@ -1,0 +1,62 @@
+Test 1D Laplacian of order 36000
+Step 1: Create Mg handle and select devices 
+	There are 6 GPUs 
+	Device 0, NVIDIA A100-SXM4-80GB, cc 8.0 
+	Device 1, NVIDIA A100-SXM4-80GB, cc 8.0 
+	Device 2, NVIDIA A100-SXM4-80GB, cc 8.0 
+	Device 3, NVIDIA A100-SXM4-80GB, cc 8.0 
+	Device 4, NVIDIA A100-SXM4-80GB, cc 8.0 
+	Device 5, NVIDIA A100-SXM4-80GB, cc 8.0 
+step 2: Enable peer access.
+	 Enable peer access from gpu 0 to gpu 1
+	 Enable peer access from gpu 0 to gpu 2
+	 Enable peer access from gpu 0 to gpu 3
+	 Enable peer access from gpu 0 to gpu 4
+	 Enable peer access from gpu 0 to gpu 5
+	 Enable peer access from gpu 1 to gpu 0
+	 Enable peer access from gpu 1 to gpu 2
+	 Enable peer access from gpu 1 to gpu 3
+	 Enable peer access from gpu 1 to gpu 4
+	 Enable peer access from gpu 1 to gpu 5
+	 Enable peer access from gpu 2 to gpu 0
+	 Enable peer access from gpu 2 to gpu 1
+	 Enable peer access from gpu 2 to gpu 3
+	 Enable peer access from gpu 2 to gpu 4
+	 Enable peer access from gpu 2 to gpu 5
+	 Enable peer access from gpu 3 to gpu 0
+	 Enable peer access from gpu 3 to gpu 1
+	 Enable peer access from gpu 3 to gpu 2
+	 Enable peer access from gpu 3 to gpu 4
+	 Enable peer access from gpu 3 to gpu 5
+	 Enable peer access from gpu 4 to gpu 0
+	 Enable peer access from gpu 4 to gpu 1
+	 Enable peer access from gpu 4 to gpu 2
+	 Enable peer access from gpu 4 to gpu 3
+	 Enable peer access from gpu 4 to gpu 5
+	 Enable peer access from gpu 5 to gpu 0
+	 Enable peer access from gpu 5 to gpu 1
+	 Enable peer access from gpu 5 to gpu 2
+	 Enable peer access from gpu 5 to gpu 3
+	 Enable peer access from gpu 5 to gpu 4
+Step 3: Allocate host memory A 
+Step 4: Prepare 1D Laplacian for A and X = ones(N,NRHS) 
+Step 5: Create RHS for reference solution on host B = A*X 
+Step 6: Create matrix descriptors for A and D 
+Step 7: Allocate distributed matrices A and B 
+Step 8: Prepare data on devices 
+Step 9: Allocate workspace space 
+	Allocate device workspace, lwork = 216017692 
+Step 10: Solve A*X = B by POTRF and POTRS 
+Run 0 time used (s): 0.7060
+Run 1 time used (s): 0.6800
+Run 2 time used (s): 0.6776
+Run 3 time used (s): 0.6814
+Run 4 time used (s): 0.6723
+Run 5 time used (s): 0.6823
+Run 6 time used (s): 0.6734
+Run 7 time used (s): 0.6758
+Run 8 time used (s): 0.6725
+Run 9 time used (s): 0.6853
+Run 10 time used (s): 0.6827
+Total time used (s): 7.4894
+step 12: Free resources 

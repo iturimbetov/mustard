@@ -1,0 +1,11 @@
+device potrf n 72000, nb 9000, p-by-q 8-by-1, residual nan, tol 2.22e-16, time 3.9226 sec, FAILED
+device potrf n 72000, nb 9000, p-by-q 8-by-1, residual nan, tol 2.22e-16, time 3.3108 sec, FAILED
+device potrf n 72000, nb 9000, p-by-q 8-by-1, residual nan, tol 2.22e-16, time 3.3503 sec, FAILED
+device potrf n 72000, nb 9000, p-by-q 8-by-1, residual nan, tol 2.22e-16, time 3.3206 sec, FAILED
+device potrf n 72000, nb 9000, p-by-q 8-by-1, residual nan, tol 2.22e-16, time 3.3649 sec, FAILED
+device potrf n 72000, nb 9000, p-by-q 8-by-1, residual nan, tol 2.22e-16, time 3.3249 sec, FAILED
+device potrf n 72000, nb 9000, p-by-q 8-by-1, residual nan, tol 2.22e-16, time 3.3769 sec, FAILED
+device potrf n 72000, nb 9000, p-by-q 8-by-1, residual nan, tol 2.22e-16, time 3.3350 sec, FAILED
+device potrf n 72000, nb 9000, p-by-q 8-by-1, residual nan, tol 2.22e-16, time 3.4230 sec, FAILED
+device potrf n 72000, nb 9000, p-by-q 8-by-1, residual nan, tol 2.22e-16, time 3.3907 sec, FAILED
+device potrf n 72000, nb 9000, p-by-q 8-by-1, residual nan, tol 2.22e-16, time 3.3597 sec, FAILED

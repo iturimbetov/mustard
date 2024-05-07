@@ -1,0 +1,81 @@
+SUBGRAPH with N=60000 (8 of 7500x7500 tiles)
+SM Limit per kernel = 100
+cuBLAS workspace = 2048 kB
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+device 4 | 0 run | time (s): 1.5069
+device 2 | 0 run | time (s): 1.4910
+device 0 | 0 run | time (s): 1.5132
+device 5 | 0 run | time (s): 1.5011
+device 1 | 0 run | time (s): 1.4900
+device 3 | 0 run | time (s): 1.5015
+device 2 | 1 run | time (s): 1.4158
+device 3 | 1 run | time (s): 1.4139
+device 5 | 1 run | time (s): 1.4168
+device 0 | 1 run | time (s): 1.4328
+device 4 | 1 run | time (s): 1.4157
+device 1 | 1 run | time (s): 1.4157
+device 2 | 2 run | time (s): 1.5692
+device 1 | 2 run | time (s): 1.5812
+device 5 | 2 run | time (s): 1.5692
+device 0 | 2 run | time (s): 1.6020
+device 4 | 2 run | time (s): 1.5812
+device 3 | 2 run | time (s): 1.5812
+device 1 | 3 run | time (s): 1.5230
+device 2 | 3 run | time (s): 1.5253
+device 5 | 3 run | time (s): 1.5253
+device 0 | 3 run | time (s): 1.5368
+device 4 | 3 run | time (s): 1.5250
+device 3 | 3 run | time (s): 1.5177
+device 3 | 4 run | time (s): 1.3023
+device 1 | 4 run | time (s): 1.3000
+device 4 | 4 run | time (s): 1.2775
+device 0 | 4 run | time (s): 1.3046
+device 5 | 4 run | time (s): 1.2928
+device 2 | 4 run | time (s): 1.2928
+device 1 | 5 run | time (s): 1.7690
+device 2 | 5 run | time (s): 1.7477
+device 4 | 5 run | time (s): 1.7700
+device 0 | 5 run | time (s): 1.7685
+device 3 | 5 run | time (s): 1.7477
+device 5 | 5 run | time (s): 1.7487
+device 1 | 6 run | time (s): 1.2894
+device 3 | 6 run | time (s): 1.2894
+device 4 | 6 run | time (s): 1.2894
+device 0 | 6 run | time (s): 1.2994
+device 5 | 6 run | time (s): 1.2778
+device 2 | 6 run | time (s): 1.2788
+device 3 | 7 run | time (s): 1.3682
+device 0 | 7 run | time (s): 1.3710
+device 5 | 7 run | time (s): 1.3575
+device 1 | 7 run | time (s): 1.3445
+device 2 | 7 run | time (s): 1.3596
+device 4 | 7 run | time (s): 1.3575
+device 3 | 8 run | time (s): 1.6360
+device 5 | 8 run | time (s): 1.6386
+device 0 | 8 run | time (s): 1.6438
+device 1 | 8 run | time (s): 1.6306
+device 2 | 8 run | time (s): 1.6230
+device 4 | 8 run | time (s): 1.6210
+device 2 | 9 run | time (s): 1.5754
+device 5 | 9 run | time (s): 1.5845
+device 0 | 9 run | time (s): 1.5828
+device 3 | 9 run | time (s): 1.5714
+device 4 | 9 run | time (s): 1.5639
+device 1 | 9 run | time (s): 1.5639
+device 2 | 10 run | time (s): 1.4499
+device 1 | 10 run | time (s): 1.4499
+device 3 | 10 run | time (s): 1.4499
+device 0 | 10 run | time (s): 1.4687
+device 5 | 10 run | time (s): 1.4537
+device 4 | 10 run | time (s): 1.4320
+Total time used (s): 16.3791
+Total time used (s): 16.5234
+Total time used (s): 16.3285
+Total time used (s): 16.3401
+Total time used (s): 16.3659
+Total time used (s): 16.3570

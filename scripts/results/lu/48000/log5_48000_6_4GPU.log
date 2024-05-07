@@ -1,0 +1,9 @@
+device getrf n 48000, nb 8000, p-by-q 4-by-1, residual 9.43e-21, tol 2.22e-16, time 80.2793 sec, pass
+device getrf n 48000, nb 8000, p-by-q 4-by-1, residual 9.64e-21, tol 2.22e-16, time 80.9074 sec, pass
+device getrf n 48000, nb 8000, p-by-q 4-by-1, residual 1.28e-20, tol 2.22e-16, time 81.0518 sec, pass
+device getrf n 48000, nb 8000, p-by-q 4-by-1, residual 1.64e-20, tol 2.22e-16, time 81.0910 sec, pass
+device getrf n 48000, nb 8000, p-by-q 4-by-1, residual 2.05e-20, tol 2.22e-16, time 81.0556 sec, pass
+device getrf n 48000, nb 8000, p-by-q 4-by-1, residual 2.43e-20, tol 2.22e-16, time 80.9275 sec, pass
+device getrf n 48000, nb 8000, p-by-q 4-by-1, residual 2.79e-20, tol 2.22e-16, time 80.9430 sec, pass
+device getrf n 48000, nb 8000, p-by-q 4-by-1, residual 3.05e-20, tol 2.22e-16, time 80.9306 sec, pass
+device getrf n 48000, nb 8000, p-by-q 4-by-1, residual 3.08e-20, tol 2.22e-16, time 81.0226 sec, pass

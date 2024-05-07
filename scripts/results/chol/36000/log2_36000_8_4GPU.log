@@ -1,0 +1,55 @@
+SUBGRAPH with N=36000 (8 of 4500x4500 tiles)
+SM Limit per kernel = 100
+cuBLAS workspace = 2048 kB
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+device 1 | 0 run | time (s): 0.4207
+device 0 | 0 run | time (s): 0.4126
+device 2 | 0 run | time (s): 0.3961
+device 3 | 0 run | time (s): 0.4138
+device 2 | 1 run | time (s): 0.4201
+device 0 | 1 run | time (s): 0.4055
+device 3 | 1 run | time (s): 0.4072
+device 1 | 1 run | time (s): 0.4071
+device 1 | 2 run | time (s): 0.5151
+device 0 | 2 run | time (s): 0.5037
+device 2 | 2 run | time (s): 0.5083
+device 3 | 2 run | time (s): 0.5083
+device 0 | 3 run | time (s): 0.5605
+device 1 | 3 run | time (s): 0.5477
+device 2 | 3 run | time (s): 0.5477
+device 3 | 3 run | time (s): 0.5477
+device 1 | 4 run | time (s): 0.4241
+device 0 | 4 run | time (s): 0.4128
+device 2 | 4 run | time (s): 0.4215
+device 3 | 4 run | time (s): 0.4215
+device 3 | 5 run | time (s): 0.4211
+device 2 | 5 run | time (s): 0.4221
+device 0 | 5 run | time (s): 0.4114
+device 1 | 5 run | time (s): 0.4040
+device 2 | 6 run | time (s): 0.4283
+device 1 | 6 run | time (s): 0.4293
+device 3 | 6 run | time (s): 0.4100
+device 0 | 6 run | time (s): 0.4225
+device 3 | 7 run | time (s): 0.4568
+device 2 | 7 run | time (s): 0.4478
+device 1 | 7 run | time (s): 0.4560
+device 0 | 7 run | time (s): 0.4480
+device 2 | 8 run | time (s): 0.4085
+device 1 | 8 run | time (s): 0.4004
+device 3 | 8 run | time (s): 0.4004
+device 0 | 8 run | time (s): 0.4002
+device 3 | 9 run | time (s): 0.4839
+device 0 | 9 run | time (s): 0.4765
+device 2 | 9 run | time (s): 0.4681
+device 1 | 9 run | time (s): 0.4730
+device 3 | 10 run | time (s): 0.4300
+device 2 | 10 run | time (s): 0.4049
+device 1 | 10 run | time (s): 0.4159
+device 0 | 10 run | time (s): 0.4287
+Total time used (s): 4.8934
+Total time used (s): 4.8734
+Total time used (s): 4.9007
+Total time used (s): 4.8824

@@ -1,0 +1,24 @@
+SUBGRAPH with N=48000 (6 of 8000x8000 tiles)
+SM Limit per kernel = 100
+cuBLAS workspace = 25600 kB
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+PE 0. Create subgraph with subN=2 (2 of 4000x4000 tiles)
+PE 0. Create subgraph with subN=2 (2 of 4000x4000 tiles)
+PE 0. Create subgraph with subN=2 (2 of 4000x4000 tiles)
+PE 0. Create subgraph with subN=2 (2 of 4000x4000 tiles)
+PE 0. Create subgraph with subN=2 (2 of 4000x4000 tiles)
+PE 0. Create subgraph with subN=2 (2 of 4000x4000 tiles)
+device 0 | 0 run | time (s): 4.4199
+device 0 | 1 run | time (s): 4.4063
+device 0 | 2 run | time (s): 4.4345
+device 0 | 3 run | time (s): 4.4547
+device 0 | 4 run | time (s): 4.4501
+device 0 | 5 run | time (s): 4.4435
+device 0 | 6 run | time (s): 4.4587
+device 0 | 7 run | time (s): 4.4627
+device 0 | 8 run | time (s): 4.4649
+device 0 | 9 run | time (s): 4.4383
+device 0 | 10 run | time (s): 4.4343
+Total time used (s): 48.8680

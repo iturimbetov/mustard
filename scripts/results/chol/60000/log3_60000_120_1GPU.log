@@ -1,0 +1,68 @@
+Test 1D Laplacian of order 60000
+Step 1: Create Mg handle and select devices 
+	There are 1 GPUs 
+	Device 0, NVIDIA A100-SXM4-80GB, cc 8.0 
+step 2: Enable peer access.
+Step 3: Allocate host memory A 
+Step 4: Prepare 1D Laplacian for A and X = ones(N,NRHS) 
+Step 6: Create matrix descriptors for A and D 
+Step 7: Allocate distributed matrices A and B 
+Step 8: Prepare data on devices 
+Step 9: Allocate workspace space 
+	Allocate device workspace, lwork = 30000148 
+Step 10: Solve A*X = B by POTRF and POTRS 
+Run 0 time used (s): 5.0390
+Run 1 time used (s): 5.0488
+Run 2 time used (s): 5.0705
+Run 3 time used (s): 5.0885
+Run 4 time used (s): 5.1011
+Run 5 time used (s): 5.1019
+Run 6 time used (s): 5.0895
+Run 7 time used (s): 5.0679
+Run 8 time used (s): 5.0566
+Run 9 time used (s): 5.0593
+Run 10 time used (s): 5.0587
+Total time used (s): 55.7818
+step 12: Free resources 
+Test 1D Laplacian of order 60000
+Step 1: Create Mg handle and select devices 
+	There are 1 GPUs 
+	Device 0, NVIDIA A100-SXM4-80GB, cc 8.0 
+step 2: Enable peer access.
+Step 3: Allocate host memory A 
+Step 4: Prepare 1D Laplacian for A and X = ones(N,NRHS) 
+Step 6: Create matrix descriptors for A and D 
+Step 7: Allocate distributed matrices A and B 
+Step 8: Prepare data on devices 
+Step 9: Allocate workspace space 
+	Allocate device workspace, lwork = 30000148 
+Step 10: Solve A*X = B by POTRF and POTRS 
+Run 0 time used (s): 5.2721
+Run 1 time used (s): 5.0559
+Run 2 time used (s): 5.0740
+Run 3 time used (s): 5.0859
+Run 4 time used (s): 5.0682
+Run 5 time used (s): 5.0581
+Total time used (s): 30.6142
+step 12: Free resources 
+Test 1D Laplacian of order 60000
+Step 1: Create Mg handle and select devices 
+	There are 1 GPUs 
+	Device 0, NVIDIA A100-SXM4-80GB, cc 8.0 
+step 2: Enable peer access.
+Step 3: Allocate host memory A 
+Step 4: Prepare 1D Laplacian for A and X = ones(N,NRHS) 
+Step 6: Create matrix descriptors for A and D 
+Step 7: Allocate distributed matrices A and B 
+Step 8: Prepare data on devices 
+Step 9: Allocate workspace space 
+	Allocate device workspace, lwork = 30000148 
+Step 10: Solve A*X = B by POTRF and POTRS 
+Run 0 time used (s): 5.0282
+Run 1 time used (s): 5.0399
+Run 2 time used (s): 5.0506
+Run 3 time used (s): 5.0613
+Run 4 time used (s): 5.0736
+Run 5 time used (s): 5.0773
+Total time used (s): 30.3309
+step 12: Free resources 

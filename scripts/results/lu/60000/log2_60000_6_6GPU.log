@@ -1,0 +1,129 @@
+SUBGRAPH with N=60000 (6 of 10000x10000 tiles)
+SM Limit per kernel = 100
+cuBLAS workspace = 25600 kB
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+src/modules/transport/ibrc/ibrc.cpp:nvshmemt_init:1850: neither nv_peer_mem, or nvidia_peermem detected. Skipping transport.
+
+WARN: init failed for remote transport: ibrc
+PE 0. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 5. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 4. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 2. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 3. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 1. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 4. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 2. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 1. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 5. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 3. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 4. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 0. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 1. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 5. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 3. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 0. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 2. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 4. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 2. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 4. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 1. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 5. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 3. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 0. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 4. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 1. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 5. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 3. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 0. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 1. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 3. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 2. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 2. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 0. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+PE 5. Create subgraph with subN=3 (3 of 3333x3333 tiles)
+device 5 | 0 run | time (s): 2.0898
+device 4 | 0 run | time (s): 2.1026
+device 2 | 0 run | time (s): 2.1026
+device 0 | 0 run | time (s): 2.1540
+device 3 | 0 run | time (s): 2.1080
+device 1 | 0 run | time (s): 2.1148
+device 5 | 1 run | time (s): 2.2023
+device 0 | 1 run | time (s): 2.2555
+device 4 | 1 run | time (s): 2.2030
+device 3 | 1 run | time (s): 2.1890
+device 1 | 1 run | time (s): 2.2037
+device 2 | 1 run | time (s): 2.2137
+device 4 | 2 run | time (s): 2.1337
+device 5 | 2 run | time (s): 2.1337
+device 1 | 2 run | time (s): 2.1376
+device 3 | 2 run | time (s): 2.1350
+device 0 | 2 run | time (s): 2.1920
+device 2 | 2 run | time (s): 2.1406
+device 4 | 3 run | time (s): 2.2040
+device 1 | 3 run | time (s): 2.1986
+device 5 | 3 run | time (s): 2.2030
+device 0 | 3 run | time (s): 2.2729
+device 2 | 3 run | time (s): 2.2090
+device 3 | 3 run | time (s): 2.2096
+device 4 | 4 run | time (s): 2.2338
+device 5 | 4 run | time (s): 2.2430
+device 3 | 4 run | time (s): 2.2348
+device 2 | 4 run | time (s): 2.2408
+device 0 | 4 run | time (s): 2.2934
+device 1 | 4 run | time (s): 2.2388
+device 1 | 5 run | time (s): 2.3458
+device 3 | 5 run | time (s): 2.3630
+device 4 | 5 run | time (s): 2.3630
+device 5 | 5 run | time (s): 2.3754
+device 0 | 5 run | time (s): 2.4080
+device 2 | 5 run | time (s): 2.3672
+device 1 | 6 run | time (s): 2.1129
+device 4 | 6 run | time (s): 2.1060
+device 0 | 6 run | time (s): 2.1691
+device 2 | 6 run | time (s): 2.1171
+device 3 | 6 run | time (s): 2.1038
+device 5 | 6 run | time (s): 2.1129
+device 4 | 7 run | time (s): 2.1570
+device 5 | 7 run | time (s): 2.1610
+device 2 | 7 run | time (s): 2.1559
+device 0 | 7 run | time (s): 2.2172
+device 3 | 7 run | time (s): 2.1752
+device 1 | 7 run | time (s): 2.1662
+device 3 | 8 run | time (s): 2.2175
+device 2 | 8 run | time (s): 2.2431
+device 4 | 8 run | time (s): 2.2295
+device 1 | 8 run | time (s): 2.2370
+device 0 | 8 run | time (s): 2.2880
+device 5 | 8 run | time (s): 2.2401
+device 1 | 9 run | time (s): 2.1410
+device 2 | 9 run | time (s): 2.1540
+device 3 | 9 run | time (s): 2.1358
+device 5 | 9 run | time (s): 2.1440
+device 4 | 9 run | time (s): 2.1450
+device 0 | 9 run | time (s): 2.1785
+device 1 | 10 run | time (s): 2.2250
+device 5 | 10 run | time (s): 2.2212
+device 3 | 10 run | time (s): 2.2212
+device 2 | 10 run | time (s): 2.2212
+device 4 | 10 run | time (s): 2.2222
+device 0 | 10 run | time (s): 2.2770
+Total time used (s): 24.1265
+Total time used (s): 24.0998
+Total time used (s): 24.0928
+Total time used (s): 24.1653
+Total time used (s): 24.1215
+Total time used (s): 24.7056

@@ -1,0 +1,2 @@
+device getrf n 72000, nb 12000, p-by-q 8-by-1, residual 5.93e-21, tol 2.22e-16, time 284.0728 sec, pass
+device getrf n 72000, nb 12000, p-by-q 8-by-1, residual 1.01e-20, tol 2.22e-16, time 285.6237 sec, pass

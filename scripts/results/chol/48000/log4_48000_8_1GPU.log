@@ -1,0 +1,56 @@
+BLOCK SIZE = 6000
+SIZE = 48000
+# size	ms	GFlop/s
+48000	7471	9868.7
+[starpu][compare_value_and_recalibrate] Current configuration does not match the bus performance model (CUDA: (stored) 8 != (current) 1), recalibrating...
+[starpu][benchmark_all_gpu_devices] CUDA 0...
+[starpu][measure_bandwidth_between_numa_nodes_and_dev] with NUMA 0...
+[starpu][benchmark_all_gpu_devices] OpenCL 0...
+[starpu][measure_bandwidth_between_numa_nodes_and_dev] with NUMA 0...
+[starpu][compare_value_and_recalibrate] ... done
+[starpu][compare_value_and_recalibrate] Current configuration does not match the bus performance model (OpenCL: (stored) 8 != (current) 1), recalibrating...
+[starpu][compare_value_and_recalibrate] ... done
+BLOCK SIZE = 6000
+SIZE = 48000
+# size	ms	GFlop/s
+48000	7465	9877.1
+BLOCK SIZE = 6000
+SIZE = 48000
+# size	ms	GFlop/s
+48000	7466	9875.6
+BLOCK SIZE = 6000
+SIZE = 48000
+# size	ms	GFlop/s
+48000	7469	9871.1
+BLOCK SIZE = 6000
+SIZE = 48000
+# size	ms	GFlop/s
+48000	7457	9887.4
+BLOCK SIZE = 6000
+SIZE = 48000
+# size	ms	GFlop/s
+48000	7462	9879.9
+BLOCK SIZE = 6000
+SIZE = 48000
+# size	ms	GFlop/s
+48000	7466	9875.6
+BLOCK SIZE = 6000
+SIZE = 48000
+# size	ms	GFlop/s
+48000	7458	9886.4
+BLOCK SIZE = 6000
+SIZE = 48000
+# size	ms	GFlop/s
+48000	7456	9888.9
+BLOCK SIZE = 6000
+SIZE = 48000
+# size	ms	GFlop/s
+48000	7466	9875.5
+BLOCK SIZE = 6000
+SIZE = 48000
+# size	ms	GFlop/s
+48000	7468	9873.1
+BLOCK SIZE = 6000
+SIZE = 48000
+# size	ms	GFlop/s
+48000	7457	9886.7

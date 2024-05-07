@@ -1,0 +1,29 @@
+SUBGRAPH with N=48000 (8 of 6000x6000 tiles)
+SM Limit per kernel = 100
+cuBLAS workspace = 2048 kB
+WARN: init failed for remote transport: ibrc
+WARN: init failed for remote transport: ibrc
+device 0 | 0 run | time (s): 1.7702
+device 1 | 0 run | time (s): 1.7559
+device 0 | 1 run | time (s): 1.2908
+device 1 | 1 run | time (s): 1.2780
+device 0 | 2 run | time (s): 1.4892
+device 1 | 2 run | time (s): 1.4824
+device 1 | 3 run | time (s): 1.4256
+device 0 | 3 run | time (s): 1.4266
+device 1 | 4 run | time (s): 1.3807
+device 0 | 4 run | time (s): 1.3862
+device 0 | 5 run | time (s): 1.5319
+device 1 | 5 run | time (s): 1.5251
+device 0 | 6 run | time (s): 1.3205
+device 1 | 6 run | time (s): 1.2990
+device 0 | 7 run | time (s): 1.4906
+device 1 | 7 run | time (s): 1.4823
+device 1 | 8 run | time (s): 1.3213
+device 0 | 8 run | time (s): 1.3231
+device 1 | 9 run | time (s): 1.4790
+device 0 | 9 run | time (s): 1.4855
+device 0 | 10 run | time (s): 1.5348
+device 1 | 10 run | time (s): 1.5218
+Total time used (s): 16.0495
+Total time used (s): 15.9511
