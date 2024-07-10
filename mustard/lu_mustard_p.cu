@@ -160,19 +160,20 @@ void tiledLUPart(bool verify, bool dot)
     generateRandomSymmetricPositiveDefiniteMatrix(originalMatrix.get(), N);
 
     double *d_matrix, *d_buffer;
-    if (myPE == 0)
+    if (myPE == 0 && verbose)
         printMatrix(originalMatrix.get(), N, N);
 
     size_t sliceCount = T / nPE;
     size_t sliceMax = T / nPE;
     size_t sliceSize = B*B * T;
-    size_t rem = T % nPE;
+    int rem = T % nPE;
+    int neighborPE = (myPE+1)%nPE;
     if (rem > 0)
         sliceMax++;
     local_N = sliceMax*B;
     if (rem > myPE)
         sliceCount++;
-    std::cout << T << " slices. PE " << myPE << " has " << sliceCount << " . Max=" << sliceMax << std::endl;
+    // std::cout << T << " slices. PE " << myPE << " has " << sliceCount << std::endl;
 
     auto getMatrixBlock = [&](double* matrix, int i, int j, int width=local_N)
     {
@@ -194,15 +195,14 @@ void tiledLUPart(bool verify, bool dot)
                                     sizeof(double) * B, 
                                     N, cudaMemcpyHostToDevice)); 
 
-    // Copy to device
-    for (int pe = 0; pe < nPE; pe++) {
-        nvshmem_barrier_all();
-        if (myPE == pe) {
-            std::cout << " PE " << myPE << std::endl;
-            kernel_print_matrix<<<1, 1>>>(d_matrix, N, local_N);
-            cudaDeviceSynchronize();
-        }
-    }
+    // for (int pe = 0; pe < nPE; pe++) {
+    //     nvshmem_barrier_all();
+    //     if (myPE == pe) {
+    //         std::cout << "Data on PE " << myPE << std::endl;
+    //         kernel_print_matrix<<<1, 1>>>(d_matrix, N, local_N);
+    //         cudaDeviceSynchronize();
+    //     }
+    // }
     
     // Initialize libraries
     cusolverDnHandle_t cusolverDnHandle;
@@ -230,7 +230,7 @@ void tiledLUPart(bool verify, bool dot)
 
     // void *h_workspace, *d_workspace_cusolver;
     double *d_workspace_cusolver;
-    int workspaces = T*T; //! can be optimized to sliceCount at least
+    int workspaces = sliceCount*T;
     int *d_info;
     void **d_workspace_cublas = (void **)malloc(sizeof(void *)*workspaces);
     workspaceInBytesOnDevice*=8;
@@ -241,9 +241,6 @@ void tiledLUPart(bool verify, bool dot)
         checkCudaErrors(cudaMalloc(&d_workspace_cublas[i], cublasWorkspaceSize));
     }
     checkCudaErrors(cudaMalloc(&d_info, sizeof(int)));
-
-    cudaGraph_t graph;
-    checkCudaErrors(cudaGraphCreate(&graph, 0));
 
     int totalNodes = T;
     for (int k = 0; k < T; k++)
@@ -262,11 +259,11 @@ void tiledLUPart(bool verify, bool dot)
     checkCudaErrors(cudaStreamCreate(&s));
     cudaStream_t copyStreams[numCopyStreams];
     cudaEvent_t copyEvents[numCopyStreams+1];
+    checkCudaErrors(cudaEventCreate(&copyEvents[numCopyStreams]));
     for (int streamID = 0; streamID < numCopyStreams; streamID++) {
         checkCudaErrors(cudaStreamCreate(&copyStreams[streamID]));
         checkCudaErrors(cudaEventCreate(&copyEvents[streamID]));
     }
-    checkCudaErrors(cudaEventCreate(&copyEvents[numCopyStreams]));
 
     checkCudaErrors(cusolverDnSetStream(cusolverDnHandle, s));
     checkCudaErrors(cublasSetStream(cublasHandle, s));
@@ -278,22 +275,22 @@ void tiledLUPart(bool verify, bool dot)
     for (int i = 0; i < totalNodes; i++)
         h_dependencies[i] = 0;
 
+    cudaGraph_t graph;
+    checkCudaErrors(cudaGraphCreate(&graph, 0));
     auto tiledLUGraphCreator = std::make_unique<mustard::TiledGraphCreator>(s, graph, false, totalNodes);
 
     int nodeIndex = 0;
-    int neighborPE = (myPE+1)%nPE;
-    std::cout << "PE " << myPE << ". My neighbor is " << neighborPE << std::endl;
     for (int k = 0; k < T; k++)
     {
         //* A[k][k] = GETRF(A[k][k])
         //* L[k][k]*U[k][k] = A[k][k]
         
-        bool mySlice = (k % nPE == myPE);
+        int currentPE = k % nPE;
         int myNodeIndex = 0;
         // int local_k = max(0, k - myPE)/nPE;
         int local_k = k / nPE;
         
-        if (mySlice) {
+        if (currentPE == myPE) {
             // checkCudaErrors(cublasSetWorkspace(cublasHandle, d_workspace_cublas[myNodeIndex++], cublasWorkspaceSize));
             tiledLUGraphCreator->beginCaptureOperation(
                 std::make_pair(k, k),
@@ -307,7 +304,6 @@ void tiledLUPart(bool verify, bool dot)
                 d_workspace_cusolver,
                 NULL,
                 d_info));
-            // nvshmemx_quiet_on_stream(s);
 
             // *: current design - check the next comment block
             if (k+1 < T) // if there is a neighbor on the right
@@ -318,7 +314,8 @@ void tiledLUPart(bool verify, bool dot)
                                                             B, B, local_N, nodeIndex);
 
             tiledLUGraphCreator->endCaptureOperation();
-        } else if (k+myPE < T && k+1 < T) { // if there are neighbor tiles  //! make sure it works
+        } else if (k+(currentPE-myPE)+1 < T) { // if there are neighbor tiles
+        //} else if (k+myPE < T && k+1 < T) { // if there are neighbor tiles  //! make sure it works
             tiledLUGraphCreator->beginCaptureOperation(
                 std::make_pair(k, k),
                 {std::make_pair(k, k)});
@@ -327,7 +324,6 @@ void tiledLUPart(bool verify, bool dot)
             // *: current design - chain broadcast (works because immediate neighbor's tiles are more important)
             // *also distributes dependency update load and does not require busy-waiting on remote memory
             mustard::kernel_dep_wait<<<1, 1, 0, s>>>(d_dependencies, nodeIndex, myPE);
-            // nvshmemx_quiet_on_stream(s);
             h_dependencies[nodeIndex]++;
             if (k+myPE+1 < T && (k % nPE) != neighborPE) // if there's a neighbor and it's not the parent
                 mustard::kernel_dep_update_noq<<<1, 1, 0, s>>>(d_dependencies, nodeIndex, neighborPE, myPE);
@@ -342,11 +338,9 @@ void tiledLUPart(bool verify, bool dot)
             //* no need for local_i version because everything here is local
             //* as all the tiles belong to the same column and therefore same PE
 
-            if (mySlice) {
+            if (currentPE == myPE) {
                 // ?: there seemed to be some issue with this workspace thingy
-                if (myPE == peToPrint)
-                    printf("%d workspace \n\n", k*sliceMax+i);
-                checkCudaErrors(cublasSetWorkspace(cublasHandle, d_workspace_cublas[k*sliceMax+i], 
+                checkCudaErrors(cublasSetWorkspace(cublasHandle, d_workspace_cublas[myNodeIndex++], 
                                                    cublasWorkspaceSize));
                 tiledLUGraphCreator->beginCaptureOperation(
                     std::make_pair(k, i),
@@ -361,7 +355,6 @@ void tiledLUPart(bool verify, bool dot)
                     &one,
                     getMatrixBlock(d_matrix, local_k, k), local_N,
                     getMatrixBlock(d_matrix, local_k, i), local_N)); 
-                // nvshmemx_quiet_on_stream(s);
 
                 if (myPE == peToPrint && nodeIndex == nodeToPrint)
                     kernel_print_submatrix<<<108, 1024, 0, s>>>(getMatrixBlock(d_matrix, local_k, i), 
@@ -370,13 +363,14 @@ void tiledLUPart(bool verify, bool dot)
                 if (k+1 < T) // if there is a neighbor on the right
                     mustard::kernel_dep_update_noq<<<1, 1, 0, s>>>(d_dependencies, nodeIndex, neighborPE, myPE);
                 tiledLUGraphCreator->endCaptureOperation();
-                
-            } else if (k+myPE < T) { // if there are neighbor tiles
+            
+            } else if (k+(currentPE-myPE)+1 < T) { // if there are neighbor tiles
+            //} else if (local_k < sliceCount && k+1 < T) { // if there are neighbor tiles
+            //} else if (k+myPE < T) { // if there are neighbor tiles
                 tiledLUGraphCreator->beginCaptureOperation(
                     std::make_pair(k, i),
                     {std::make_pair(k, k), std::make_pair(k, i)});
                 mustard::kernel_dep_wait<<<1, 1, 0, s>>>(d_dependencies, nodeIndex, myPE);
-                // nvshmemx_quiet_on_stream(s);
                 h_dependencies[nodeIndex]++;
                 // if there's a neighbor and it's not the parent, update their dependencies too (chain)
                 if (k+myPE+1 < T && (k % nPE) != neighborPE) 
@@ -391,21 +385,19 @@ void tiledLUPart(bool verify, bool dot)
         {
             //* U[k][i] = TRSM(A[k][k], A[k][i]) // the L part of A[k][k]
             
-            mySlice = (i % nPE == myPE);
+            currentPE = i % nPE;
             int local_i = i / nPE;
             
-            if (mySlice) {
-                if (myPE == peToPrint)
-                    printf("%d workspace \n\n", i*sliceMax+k);
-                checkCudaErrors(cublasSetWorkspace(cublasHandle, d_workspace_cublas[i*sliceMax+k], 
-                                cublasWorkspaceSize));
+            if (currentPE == myPE) {
+                checkCudaErrors(cublasSetWorkspace(cublasHandle, d_workspace_cublas[myNodeIndex++], 
+                                                   cublasWorkspaceSize));
                 tiledLUGraphCreator->beginCaptureOperation(
                     std::make_pair(i, k),
                     {std::make_pair(k, k), std::make_pair(i, k)});
 
                 // *: required memcpy for TRSM_RIGHT: needs the GETRF output
                 if (k % nPE != myPE) { // this should only be copied if the parent is remote
-                    nvshmemx_quiet_on_stream(s);
+                    nvshmemx_quiet_on_stream(s); // need this for consistency
                     checkCudaErrors(cudaEventRecord(copyEvents[numCopyStreams], s));
                         for (int row = 0; row < B; row++) {
                             int idx = row%numCopyStreams;
@@ -452,11 +444,9 @@ void tiledLUPart(bool verify, bool dot)
                 //* A[j][i] = GEMM(A[j][k], A[i][k])
                 //* A[j][i] = A[j][i] - L[j][k] * L[i][k]^T
 
-                if (mySlice) {
-                    if (myPE == peToPrint)
-                        printf("%d workspace \n\n", i*sliceMax+j);
-                    checkCudaErrors(cublasSetWorkspace(cublasHandle, d_workspace_cublas[i*sliceMax+j], 
-                                    cublasWorkspaceSize));
+                if (currentPE == myPE) {
+                    checkCudaErrors(cublasSetWorkspace(cublasHandle, d_workspace_cublas[myNodeIndex++], 
+                                                       cublasWorkspaceSize));
                     tiledLUGraphCreator->beginCaptureOperation(
                         std::make_pair(i, j),
                         {std::make_pair(i, k), std::make_pair(k, j), std::make_pair(i, j)}); 
@@ -474,10 +464,6 @@ void tiledLUPart(bool verify, bool dot)
                             checkCudaErrors(cudaEventRecord(copyEvents[idx], copyStreams[idx]));
                             checkCudaErrors(cudaStreamWaitEvent(s, copyEvents[idx], 0));
                         }
-                        // if (myPE == peToPrint && nodeIndex == nodeToPrint) { 
-                        //     kernel_print_submatrix<<<108, 1024, 0, s>>>(getMatrixBlock(d_buffer, local_i, j), 
-                        //                                                 B, B, local_N, nodeIndex);
-                        // }
                         checkCudaErrors(cublasGemmEx(
                             cublasHandle,
                             CUBLAS_OP_N,
@@ -490,14 +476,6 @@ void tiledLUPart(bool verify, bool dot)
                             getMatrixBlock(d_matrix, local_i, j), CUDA_R_64F, local_N,
                             CUBLAS_COMPUTE_64F,
                             CUBLAS_GEMM_DEFAULT));
-                        if (myPE == peToPrint && nodeIndex == nodeToPrint) { 
-                            kernel_print_submatrix<<<108, 1024, 0, s>>>(getMatrixBlock(d_buffer, local_k, j), 
-                                                                        B, B, local_N, 1000+nodeIndex);
-                        }
-                        if (myPE == peToPrint && nodeIndex == nodeToPrint) { 
-                            kernel_print_submatrix<<<108, 1024, 0, s>>>(getMatrixBlock(d_matrix, local_i, k), 
-                                                                        B, B, local_N, 1000+nodeIndex);
-                        }
                     } else {
                         checkCudaErrors(cublasGemmEx(
                             cublasHandle,
@@ -521,30 +499,32 @@ void tiledLUPart(bool verify, bool dot)
                 nodeIndex++;   
             }
         }
-        printf("NEW ITER \n\n\n");
     }
 
     checkCudaErrors(cudaDeviceSynchronize());
     
-    if (verbose) std::cout << "Printing .dot graphs..." << std::endl;
 
     for (int pe = 0; pe < nPE; pe++) {
         nvshmem_barrier_all();
-        if (myPE == pe) {
-            std::cout << " PE " << myPE << std::endl;
+        if (dot && myPE == pe) {
+            std::cout << "Printing .dot graphs on PE " << myPE << "..." << std::endl;
             char filename1[20];
             sprintf(filename1, "./graph_%d_PE%d.dot", 0, myPE);
-            if (dot)
-                checkCudaErrors(cudaGraphDebugDotPrint(tiledLUGraphCreator->graph, filename1, 0));
+            checkCudaErrors(cudaGraphDebugDotPrint(tiledLUGraphCreator->graph, filename1, 0));
         }
     }     
     
-    for (int i = 0; i < totalNodes; i++)
-    {
-        // std::cout << i << ":" << h_dependencies[i] << std::endl;
-        if (h_dependencies[i] > 0) 
-            std::cout << i << ":" << h_dependencies[i] << std::endl;
-    }
+    // for (int pe = 0; pe < nPE; pe++) {
+    //     nvshmem_barrier_all();
+    //     if (myPE == pe) {
+    //         std::cout << " PE " << myPE << std::endl;
+    //         for (int i = 0; i < totalNodes; i++)
+    //         {
+    //             if (h_dependencies[i] > 0) 
+    //                 std::cout << i << ":" << h_dependencies[i] << std::endl;
+    //         }
+    //     }
+    // }
 
     checkCudaErrors(cudaMemcpy((void *)d_dependencies, (void *)h_dependencies, 
                             sizeof(int) * totalNodes, cudaMemcpyHostToDevice));
@@ -559,14 +539,6 @@ void tiledLUPart(bool verify, bool dot)
     if (verbose) std::cout << "Launching..." << std::endl;
 
     for (int i = 0; i < runs; i++) {
-        // for (int pe = 0; pe < nPE; pe++) {
-        //     nvshmem_barrier_all();
-        //     if (myPE == pe) {
-        //         std::cout << " PE " << myPE << std::endl;
-        //         kernel_print_matrix<<<1, 1>>>(d_matrix, N, local_N);
-        //         cudaDeviceSynchronize();
-        //     }
-        // }
     
         nvshmem_barrier_all();
         clock.start(s);
@@ -583,20 +555,20 @@ void tiledLUPart(bool verify, bool dot)
         printf("device %d | %d run | time (s): %4.4f\n", myPE, i, time);
         totalTime += time;
 
-        for (int pe = 0; pe < nPE; pe++) {
-            nvshmem_barrier_all();
-            if (myPE == pe) {
-                std::cout << " PE " << myPE << std::endl;
-                kernel_print_matrix<<<1, 1>>>(d_matrix, N, local_N);
-                cudaDeviceSynchronize();
-            }
-        }
+        // for (int pe = 0; pe < nPE; pe++) {
+        //     nvshmem_barrier_all();
+        //     if (myPE == pe) {
+        //         std::cout << " PE " << myPE << std::endl;
+        //         kernel_print_matrix<<<1, 1>>>(d_matrix, N, local_N);
+        //         cudaDeviceSynchronize();
+        //     }
+        // }
     }
+    nvshmem_barrier_all();
     if (verbose) std::cout << "Done" << std::endl;
 
     nvshmem_barrier_all();
     if (verify) {
-        // TODO: need to collect data from all the matrices on all PEs
         double *h_L = (double *)malloc(N * N * sizeof(double));
         double *h_U = (double *)malloc(N * N * sizeof(double));
         // copy the local tiles
@@ -608,8 +580,8 @@ void tiledLUPart(bool verify, bool dot)
                                         sizeof(double) * B, 
                                         N, cudaMemcpyDeviceToHost)); 
         }
-        std::cout << std::endl << "After local copy:" << std::endl;
-        printSquareMatrix(h_L, N);
+        // std::cout << std::endl << "After local copy:" << std::endl;
+        // printSquareMatrix(h_L, N);
         // copy the remote tiles 
         for (int iPE = 1; iPE < nPE; iPE++) {
 
@@ -619,7 +591,8 @@ void tiledLUPart(bool verify, bool dot)
 
             nvshmem_double_get(d_buffer, d_matrix, local_N * N, iPE);
             int remoteSliceCount = T / nPE + (T % nPE > iPE);
-            std::cout << " Collect " << remoteSliceCount << " slices from PE " << iPE << std::endl;
+            if (verbose)
+                std::cout << "Collect " << remoteSliceCount << " slices from PE " << iPE << std::endl;
             for (int i = 0; i < remoteSliceCount; i++) {
                 checkCudaErrors(cudaMemcpy2D(getMatrixBlock(h_L, i*nPE + iPE, 0, N), 
                                             sizeof(double) * N, 

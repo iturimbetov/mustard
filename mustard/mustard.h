@@ -361,7 +361,8 @@ namespace mustard {
 
             // assert(noOutGoingEdgeNodes.size() == 1);
             if (noOutGoingEdgeNodes.size() != 1) {
-                std::cout << "WARNING! The graph tails: " << noOutGoingEdgeNodes.size()  << std::endl;
+                // *: seems correct anyway, because the last node can be used 
+                // std::cout << "WARNING! The graph tails: " << noOutGoingEdgeNodes.size()  << std::endl;
                 size_t numNodes = 0;
                 checkCudaErrors(cudaGraphGetNodes(graph, nullptr, &numNodes));
             
@@ -412,8 +413,9 @@ namespace mustard {
                     if (numDependentNodes == 0)
                         break;
 
-                    if(numDependentNodes != 1)
-                        std::cout << "WARNING! Node has many children, assuming future join of " << numDependentNodes  << std::endl;
+                    // *: seems correct anyway, because they are joined in the future (have the same tail) 
+                    // if(numDependentNodes != 1)
+                    //     std::cout << "WARNING! Node has many children, assuming future join of " << numDependentNodes  << std::endl;
                     
                     std::vector<cudaGraphNode_t> nodes(numDependentNodes);
                     checkCudaErrors(cudaGraphNodeGetDependentNodes(u, nodes.data(), &numDependentNodes));
