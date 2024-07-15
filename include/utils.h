@@ -116,7 +116,21 @@ void printSquareMatrix(double *h_A, const size_t n)
         {
             if (j != 0)
                 std::cout << " ";
-            std::cout << std::setw(6) << std::setprecision(3) << h_A[i * n + j];
+            std::cout << std::setw(8) << std::setprecision(6) << h_A[i * n + j];
+        }
+        std::cout << std::endl;
+    }
+}
+
+void printMatrix(double *h_A, const size_t n, const size_t m)
+{
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < m; j++)
+        {
+            if (j != 0)
+                std::cout << " ";
+            std::cout << std::setw(8) << std::setprecision(6) << h_A[i * n + j];
         }
         std::cout << std::endl;
     }
