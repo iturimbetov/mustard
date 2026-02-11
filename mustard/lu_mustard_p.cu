@@ -15,295 +15,38 @@
 #include <mpi.h>
 
 #include "argh.h"
+#include "cli.h"
+#include "gen.h"
+#include "gpu_debug.h"
 #include "mustard.h"
+#include "nvshmem_kernels.h"
+#include "verify.h"
 
-#define MAX_TILE 4000
-#define TILE_DIM 32
-
-size_t N = 15 * 1;
-size_t B = N / 5;
-size_t T = N / B;
-size_t local_width;
+// Global configuration (populated from CLI in main).
+static MustardConfig cfg;
+static size_t& N = cfg.N;
+static size_t& B = cfg.B;
+static size_t& T = cfg.T;
 int myPE;
-int myNodePE;
-int nPE;
-int verbose = 0;
-int workspace = 256;
-int smLimit = 20;
-int runs = 1;
-int numCopyStreams = 32;
+static int& verbose = cfg.verbose;
+static int& workspace = cfg.workspace;
+static int& smLimit = cfg.smLimit;
+static int& runs = cfg.runs;
 
-int nodeToPrint = 0;
-int peToPrint = 1;
-
-__global__ void makeMatrixSymmetric(double *d_matrix, size_t n)
-{
-    size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
-    size_t x = idx / n;
-    size_t y = idx % n;
-
-    if (x >= y || x >= n || y >= n)
-    {
-        return;
-    }
-
-    double average = 0.5 * (d_matrix[x * n + y] + d_matrix[y * n + x]);
-    d_matrix[x * n + y] = average;
-    d_matrix[y * n + x] = average;
-}
-
-__global__ void addIdenticalMatrix(double *d_matrix, size_t n)
-{
-    size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx >= n)
-    {
-        return;
-    }
-    d_matrix[idx * n + idx] += n;
-}
-
-// Credit to: https://math.stackexchange.com/questions/357980/how-to-generate-random-symmetric-positive-definite-matrices-using-matlab
-void generateRandomSymmetricPositiveDefiniteMatrixGPU(double *h_A, const size_t n)
-{
-    double *d_A;
-    checkCudaErrors(cudaMalloc(&d_A, n * n * sizeof(double)));
-
-    // Generate random matrix d_A
-    curandGenerator_t prng;
-    curandCreateGenerator(&prng, CURAND_RNG_PSEUDO_XORWOW);
-    // curandSetPseudoRandomGeneratorSeed(prng, (unsigned long long)clock());
-    curandSetPseudoRandomGeneratorSeed(prng, 420);
-    curandGenerateUniformDouble(prng, d_A, n * n);
-
-    // d_A = (d_A + d_A^T) / 2
-    size_t numThreads = 1024;
-    size_t numBlocks = (N * N + numThreads - 1) / numThreads;
-    makeMatrixSymmetric<<<numBlocks, numThreads>>>(d_A, N);
-
-    // d_A = d_A + n * I
-    numThreads = 1024;
-    numBlocks = (N + numThreads - 1) / numThreads;
-    addIdenticalMatrix<<<numBlocks, numThreads>>>(d_A, N);
-
-    checkCudaErrors(cudaDeviceSynchronize());
-
-    checkCudaErrors(cudaMemcpy(h_A, d_A, n * n * sizeof(double), cudaMemcpyDefault));
-
-    checkCudaErrors(cudaDeviceSynchronize());
-    checkCudaErrors(cudaFree(d_A));
-}
-
-// Credit to: https://math.stackexchange.com/questions/357980/how-to-generate-random-symmetric-positive-definite-matrices-using-matlab
-void generateRSPDMatrixBlock(curandGenerator_t prng, double *d_A, const size_t n)
-{
-    curandGenerateUniformDouble(prng, d_A, n * n);
-
-    // d_A = (d_A + d_A^T) / 2
-    size_t numThreads = 1024;
-    size_t numBlocks = (B * B + numThreads - 1) / numThreads;
-    makeMatrixSymmetric<<<numBlocks, numThreads>>>(d_A, B);
-
-    // d_A = d_A + n * I
-    numThreads = 1024;
-    numBlocks = (B + numThreads - 1) / numThreads;
-    addIdenticalMatrix<<<numBlocks, numThreads>>>(d_A, B);
-
-    checkCudaErrors(cudaDeviceSynchronize());
-}
-
-// Set upper triangle entries (excluding diagonal entries) in column-major order to zero.
-// Then, transpose to row-major order.
-void cleanCusolverLUDecompositionResult(double *L, double *U, const int n)
-{
-    for (int i = 0; i < n; i++)
-    {
-        for (int j = i; j < n; j++)
-        {
-            std::swap(L[i + j * n], L[i * n + j]);
-            U[i * n + j] = L[i * n + j];
-            L[i * n + j] = 0;
-        }
-        L[i * n + i] = 1;
-    }
-}
-
-bool verifyLUDecomposition(double *A, double *L, double *U, const int n)
-{
-    auto newA = std::make_unique<double[]>(n * n);
-    memset(newA.get(), 0, n * n * sizeof(double));
-    for (int i = 0; i < n; i++)
-    {
-        for (int j = 0; j < n; j++)
-        {
-            for (int k = 0; k < n; k++)
-            {
-                newA[i * n + j] += L[i * n + k] * U[k * n + j];
-            }
-        }
-    }
-
-    double error = 0;
-    for (int i = 0; i < n; i++)
-    {
-        for (int j = 0; j < n; j++)
-        {
-            error += fabs(A[i * n + j] - newA[i * n + j]);
-        }
-    }
-
-    if (verbose)
-    {
-        printf("A:\n");
-        printSquareMatrix(A, n);
-
-        printf("\nnewA:\n");
-        printSquareMatrix(newA.get(), n);
-
-        printf("\nL:\n");
-        printSquareMatrix(L, n);
-        printf("\n");
-
-        printf("\nU:\n");
-        printSquareMatrix(U, n);
-        printf("\n");
-    }
-
-    printf("error = %.6f}\n", error);
-
-    return error <= 1e-6;
-}
-
-__global__ void kernel_print_matrix(double *A, const size_t n, const size_t m)
-{
-    for (int i = 0; i < n; i++)
-    {
-        for (int j = 0; j < m; j++)
-        {
-            if (j != 0)
-                printf(" ");
-            // printf("A[%d]=%.3f", i * m + j, A[i * m + j]);
-            printf("%.6f", A[i * m + j]);
-        }
-        printf("\n");
-    }
-}
-
-__global__ void kernel_print_matrix(double *A, const size_t n, const size_t m, int node)
-{
-    printf("%d\n", node);
-    for (int i = 0; i < n; i++)
-    {
-        for (int j = 0; j < m; j++)
-        {
-            if (j != 0)
-                printf(" ");
-            // printf("A[%d]=%.3f", i * m + j, A[i * m + j]);
-            printf("%.3f", A[i * m + j]);
-        }
-        printf("\n");
-    }
-}
-
-__global__ void kernel_print_submatrix(double *A, const size_t n, const size_t m, const size_t pitch, int node)
-{
-    size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
-    if (tid == 0)
-    {
-        printf("%d\n", node);
-        for (int i = 0; i < n; i++)
-        {
-            for (int j = 0; j < m; j++)
-            {
-                if (j != 0)
-                    printf(" ");
-                // printf("A[%d]=%.3f", i * m + j, A[i * m + j]);
-                printf("%.3f", A[i * pitch + j]);
-            }
-            printf("\n");
-        }
-    }
-}
-
-__global__ void kernel_nvshmem_put2D(double *dst_data, size_t dst_width,
-                                     double *src_data, size_t src_width,
-                                     const size_t B, const int PE)
-{
-    for (int row = 0; row < B; row++)
-    {
-        nvshmemx_double_put_block(dst_data + dst_width * row,
-                                  src_data + src_width * row,
-                                  B, PE);
-    }
-}
-
-__global__ void kernel_nvshmem_put2D_multiBlock(double *dst_data, size_t dst_width,
-                                                double *src_data, size_t src_width,
-                                                const size_t B, const int PE)
-{
-    for (int row = 0; row < B; row++)
-    {
-        if (row % gridDim.x == blockIdx.x)
-            nvshmemx_double_put_block(dst_data + dst_width * row,
-                                      src_data + src_width * row,
-                                      B, PE);
-    }
-}
-
-__global__ void kernel_nvshmem_get2D(double *dst_data, size_t dst_width,
-                                     double *src_data, size_t src_width,
-                                     const size_t B, const int PE)
-{
-    for (int row = 0; row < B; row++)
-    {
-        nvshmemx_double_get_block(dst_data + dst_width * row,
-                                  src_data + src_width * row,
-                                  B, PE);
-    }
-}
-
-__global__ void kernel_nvshmem_get2D_multiBlock(double *dst_data, size_t dst_width,
-                                                double *src_data, size_t src_width,
-                                                const size_t B, const int PE)
-{
-    for (int row = 0; row < B; row++)
-    {
-        if (row % gridDim.x == blockIdx.x)
-            nvshmemx_double_get_block(dst_data + dst_width * row,
-                                      src_data + src_width * row,
-                                      B, PE);
-    }
-}
-
-__global__ void kernel_nvshmem_get2D_slice_multiBlock(double *dst_data, size_t dst_width,
-                                                double *src_data, size_t src_width,
-                                                const size_t B, const size_t N, const int PE)
-{
-    for (int row = 0; row < N; row++)
-    {
-        if (row % gridDim.x == blockIdx.x)
-            nvshmemx_double_get_block(dst_data + dst_width * row,
-                                      src_data + src_width * row,
-                                      B, PE);
-    }
-}
-
-// TODO: create a separate class for kernels, it will have all the kernels and cublas related stuff
-//?: maybe it can be shared for LU and Cholesky, or 2 children of a parent class
-//  void GemmLU()
-//  void TRSMLowerLU()
-//  void TRSMUpperLU()
-//  void GetrfLU()
+// Extra globals specific to partitioned LU.
+static size_t local_width;
+static int myNodePE;
+static int nPE;
+static int numCopyStreams = 32;
+static int nodeToPrint = 0;
+static int peToPrint = 1;
 
 void tiledLUPart(bool verify, bool dot)
 {
     std::unique_ptr<double[]> originalMatrix;
-    // Initialize data
     if (verify)
     {
-        originalMatrix = std::make_unique<double[]>(N * N); // Column-major
-        // generateRandomSymmetricPositiveDefiniteMatrixGPU(originalMatrix.get(), N);
-        // if (myPE == 0 && verbose)
-        //     printMatrix(originalMatrix.get(), N, N);
+        originalMatrix = std::make_unique<double[]>(N * N);
     }
 
     double *d_matrix, *d_buffer;
@@ -318,23 +61,19 @@ void tiledLUPart(bool verify, bool dot)
     size_t buffer_width = nPE * B;
     if (rem > myPE)
         sliceCount++;
-    // std::cout << T << " slices. PE " << myPE << " has " << sliceCount << std::endl;
 
     auto getMatrixBlock = [&](double *matrix, int i, int j, int width = local_width)
     {
         return matrix + i * B + j * B * width;
     };
 
-    // Does it only work with symmetric?
-    // tile_size is B*B; a column is tile_size*T; and there are T / nPE of them, if evenly divided;
+    // Tile size is B*B; a column is tile_size*T; T/nPE columns per PE if evenly divided.
     d_matrix = (double *)nvshmem_malloc(N * local_width * sizeof(double));
     d_buffer = (double *)nvshmem_malloc(N * buffer_width * sizeof(double));
-    // d_buffer = (double *) nvshmem_malloc(N * N * sizeof(double));
 
     // Initialize libraries
     cublasHandle_t cublasHandle;
     checkCudaErrors(cublasCreate(&cublasHandle));
-    // checkCudaErrors(cublasLoggerConfigure(verbose, verbose, 0, NULL));
 
     // Prepare constants
     double one = 1.0;
@@ -350,7 +89,6 @@ void tiledLUPart(bool verify, bool dot)
     // Generate random matrix d_A
     curandGenerator_t prng;
     curandCreateGenerator(&prng, CURAND_RNG_PSEUDO_XORWOW);
-    // curandSetPseudoRandomGeneratorSeed(prng, (unsigned long long)clock());
     curandSetPseudoRandomGeneratorSeed(prng, 420 + myPE);
 
     for (int i = 0; i < sliceMax; i++)
@@ -365,7 +103,7 @@ void tiledLUPart(bool verify, bool dot)
             for (int sliceRow = T - lowerBlocks; sliceRow < T; sliceRow++)
             {
                 if (sliceRow == sliceCol)
-                    generateRSPDMatrixBlock(prng, d_block, B);
+                    generateRSPDMatrixBlockGPU(prng, d_block, B);
                 else
                     curandGenerateUniformDouble(prng, d_block, B * B);
 
@@ -425,19 +163,7 @@ void tiledLUPart(bool verify, bool dot)
     checkCudaErrors(cudaFree(d_block));
     checkCudaErrors(cudaFree(d_block_trans));
 
-    // for (int pe = 0; pe < nPE; pe++)
-    // {
-    //     nvshmem_barrier_all();
-    //     if (myPE == pe)
-    //     {
-    //         std::cout << "Data on PE " << myPE << std::endl;
-    //         kernel_print_matrix<<<1, 1>>>(d_matrix, N, local_width);
-    //         cudaDeviceSynchronize();
-    //     }
-    //     nvshmem_barrier_all();
-    // }
-
-    // Continue to initialize libraries
+    // Initialize libraries
     cusolverDnHandle_t cusolverDnHandle;
     cusolverDnParams_t cusolverDnParams;
     checkCudaErrors(cusolverDnCreate(&cusolverDnHandle));
@@ -454,14 +180,13 @@ void tiledLUPart(bool verify, bool dot)
         N,
         &workspaceInBytesOnDevice));
 
-    // void *h_workspace, *d_workspace_cusolver;
     double *d_workspace_cusolver;
     int workspaces = sliceCount * T;
     int *d_info;
     void **d_workspace_cublas = (void **)malloc(sizeof(void *) * workspaces);
     workspaceInBytesOnDevice *= 8;
     checkCudaErrors(cudaMalloc(&d_workspace_cusolver, workspaceInBytesOnDevice));
-    int cublasWorkspaceSize = 1024 * workspace; // (B/256+1)*B*256*4;
+    int cublasWorkspaceSize = 1024 * workspace;
 
     for (int i = 0; i < workspaces; i++)
     {
@@ -520,7 +245,6 @@ void tiledLUPart(bool verify, bool dot)
 
         int activePE = k % nPE;
         int myNodeIndex = 0;
-        // int local_k = max(0, k - myPE)/nPE;
         int local_k = k / nPE;
         int distance = myPE - activePE;
         if (distance < 0)
@@ -528,7 +252,6 @@ void tiledLUPart(bool verify, bool dot)
 
         if (activePE == myPE)
         {
-            // checkCudaErrors(cublasSetWorkspace(cublasHandle, d_workspace_cublas[myNodeIndex++], cublasWorkspaceSize));
             tiledLUGraphCreator->beginCaptureOperation(
                 std::make_pair(k, k),
                 {std::make_pair(k, k)});
@@ -542,8 +265,8 @@ void tiledLUPart(bool verify, bool dot)
                 NULL,
                 d_info));
 
-            // *: current design - check the next comment block
-            if (k + 1 < T) // if there is a neighbor on the right
+            // Chain broadcast: current design.
+            if (k + 1 < T)
                 mustard::kernel_dep_update_noq<<<1, 1, 0, s>>>(d_dependencies, nodeIndex, neighborPE, myPE);
 
             if (myPE == peToPrint && nodeIndex == nodeToPrint)
@@ -553,8 +276,7 @@ void tiledLUPart(bool verify, bool dot)
             tiledLUGraphCreator->endCaptureOperation();
         }
         else if (distance < (T - k))
-        { // if there are neighbor tiles
-            //} else if (k+myPE < T && k+1 < T) { // if there are neighbor tiles  //! make sure it works
+        {
             if (waitHook.first == -1)
                 tiledLUGraphCreator->beginCaptureOperation(
                     std::make_pair(k, k),
@@ -563,30 +285,15 @@ void tiledLUPart(bool verify, bool dot)
                 tiledLUGraphCreator->beginCaptureOperation(
                     std::make_pair(k, k),
                     {waitHook, std::make_pair(k, k)});
-            // !: alternative design - add conditional while nodes OR use dependency waits on the remote
-            // !: also, need to update local dependencies on the same GPU without communicating with others
-            // *: current design - chain broadcast (works because immediate neighbor's tiles are more important)
-            // *also distributes dependency update load and does not require busy-waiting on remote memory
+            // Chain broadcast: wait for dependency, forward to neighbor if needed, then get remote data.
             mustard::kernel_dep_wait<<<1, 1, 0, s>>>(d_dependencies, nodeIndex, myPE);
             h_dependencies[nodeIndex]++;
-            if ((k % nPE) != neighborPE && distance + 1 < (T - k)) // if there's a neighbor and it's not the parent
+            if ((k % nPE) != neighborPE && distance + 1 < (T - k))
                 mustard::kernel_dep_update_noq<<<1, 1, 0, s>>>(d_dependencies, nodeIndex, neighborPE, myPE);
-            // nvshmemx_quiet_on_stream(s); // need this for consistency
 
             kernel_nvshmem_get2D<<<1, 1024, 0, s>>>(getMatrixBlock(d_buffer, k % nPE, k, buffer_width), buffer_width,
                                                     getMatrixBlock(d_matrix, local_k, k), local_width,
                                                     B, k % nPE);
-            // checkCudaErrors(cudaEventRecord(copyEvents[numCopyStreams], s));
-            // for (int row = 0; row < B; row++)
-            // {
-            //     int idx = row % numCopyStreams;
-            //     checkCudaErrors(cudaStreamWaitEvent(copyStreams[idx], copyEvents[numCopyStreams], 0));
-            //     nvshmemx_double_get_on_stream(getMatrixBlock(d_buffer, k % nPE, k, buffer_width) + buffer_width * row,
-            //                                   getMatrixBlock(d_matrix, local_k, k) + local_width * row,
-            //                                   B, k % nPE, copyStreams[idx]);
-            //     checkCudaErrors(cudaEventRecord(copyEvents[idx], copyStreams[idx]));
-            //     checkCudaErrors(cudaStreamWaitEvent(s, copyEvents[idx], 0));
-            // }
             nvshmemx_quiet_on_stream(s);
             tiledLUGraphCreator->endCaptureOperation();
         }
@@ -594,14 +301,11 @@ void tiledLUPart(bool verify, bool dot)
 
         for (int i = k + 1; i < T; i++)
         {
-            //* L[i][k] = TRSM(A[i][k], A[k][k]) // the U part of A[k][k]
-            // seemed like only these needed a separate workspace previously, //! not sure now
-            //* no need for local_i version because everything here is local
-            //* as all the tiles belong to the same column and therefore same PE
+            // L[i][k] = TRSM(A[i][k], A[k][k])
+            // All tiles in the same column belong to the same PE — no local_i needed.
 
             if (activePE == myPE)
             {
-                // ?: there seemed to be some issue with this workspace thingy
                 checkCudaErrors(cublasSetWorkspace(cublasHandle, d_workspace_cublas[myNodeIndex++],
                                                    cublasWorkspaceSize));
                 tiledLUGraphCreator->beginCaptureOperation(
@@ -633,26 +337,12 @@ void tiledLUPart(bool verify, bool dot)
                     {std::make_pair(k, k), std::make_pair(k, i)});
                 mustard::kernel_dep_wait<<<1, 1, 0, s>>>(d_dependencies, nodeIndex, myPE);
                 h_dependencies[nodeIndex]++;
-                // if there's a neighbor and it's not the parent, update their dependencies too (chain)
-                // if (k+myPE+1 < T && (k % nPE) != neighborPE)
-                if ((k % nPE) != neighborPE && distance + 1 < (T - k)) // if there's a neighbor and it's not the parent
+                if ((k % nPE) != neighborPE && distance + 1 < (T - k))
                     mustard::kernel_dep_update_noq<<<1, 1, 0, s>>>(d_dependencies, nodeIndex,
                                                                    neighborPE, myPE);
-                // nvshmemx_quiet_on_stream(s);
                 kernel_nvshmem_get2D<<<1, 1024, 0, s>>>(getMatrixBlock(d_buffer, k % nPE, i, buffer_width), buffer_width,
                                                         getMatrixBlock(d_matrix, local_k, i), local_width,
                                                         B, k % nPE);
-                // checkCudaErrors(cudaEventRecord(copyEvents[numCopyStreams], s));
-                // for (int row = 0; row < B; row++)
-                // {
-                //     int idx = row % numCopyStreams;
-                //     checkCudaErrors(cudaStreamWaitEvent(copyStreams[idx], copyEvents[numCopyStreams], 0));
-                //     nvshmemx_double_get_on_stream(getMatrixBlock(d_buffer, k % nPE, i, buffer_width) + buffer_width * row,
-                //                                   getMatrixBlock(d_matrix, local_k, i) + local_width * row,
-                //                                   B, k % nPE, copyStreams[idx]);
-                //     checkCudaErrors(cudaEventRecord(copyEvents[idx], copyStreams[idx]));
-                //     checkCudaErrors(cudaStreamWaitEvent(s, copyEvents[idx], 0));
-                // }
                 nvshmemx_quiet_on_stream(s);
                 tiledLUGraphCreator->endCaptureOperation();
             }
@@ -720,7 +410,6 @@ void tiledLUPart(bool verify, bool dot)
                     if (waitHook.first != i)
                     {
                         waitHook = std::make_pair(i, j);
-                        // std::cout << "waitHook set to " << waitHook << std::endl;
                     }
                     checkCudaErrors(cublasSetWorkspace(cublasHandle, d_workspace_cublas[myNodeIndex++],
                                                        cublasWorkspaceSize));
@@ -784,18 +473,6 @@ void tiledLUPart(bool verify, bool dot)
         }
     }
 
-    // for (int pe = 0; pe < nPE; pe++) {
-    //     nvshmem_barrier_all();
-    //     if (myPE == pe) {
-    //         std::cout << " PE " << myPE << std::endl;
-    //         for (int i = 0; i < totalNodes; i++)
-    //         {
-    //             if (h_dependencies[i] > 0)
-    //                 std::cout << i << ":" << h_dependencies[i] << std::endl;
-    //         }
-    //     }
-    // }
-
     checkCudaErrors(cudaMemcpy((void *)d_dependencies, (void *)h_dependencies,
                                sizeof(int) * totalNodes, cudaMemcpyHostToDevice));
 
@@ -829,15 +506,6 @@ void tiledLUPart(bool verify, bool dot)
         float time = clock.getTimeInSeconds();
         printf("device %d | %d run | time (s): %4.4f\n", myPE, i, time);
         totalTime += time;
-
-        // for (int pe = 0; pe < nPE; pe++) {
-        //     nvshmem_barrier_all();
-        //     if (myPE == pe) {
-        //         std::cout << " PE " << myPE << std::endl;
-        //         kernel_print_matrix<<<1, 1>>>(d_matrix, N, local_width);
-        //         cudaDeviceSynchronize();
-        //     }
-        // }
     }
     nvshmem_barrier_all();
     if (verbose)
@@ -858,8 +526,6 @@ void tiledLUPart(bool verify, bool dot)
                                          sizeof(double) * B,
                                          N, cudaMemcpyDeviceToHost));
         }
-        // std::cout << std::endl << "After local copy:" << std::endl;
-        // printSquareMatrix(h_L, N);
         // copy the remote tiles
         for (int iPE = 1; iPE < nPE; iPE++)
         {
@@ -876,18 +542,12 @@ void tiledLUPart(bool verify, bool dot)
                                              sizeof(double) * local_width,
                                              sizeof(double) * B,
                                              N, cudaMemcpyDeviceToHost));
-                // std::cout << std::endl << "After slice " << i*nPE + iPE << " :" << std::endl;
-                // printSquareMatrix(h_L, N);
             }
 
-            // std::cout << "buffer of  PE " << myPE << std::endl;
-            // kernel_print_matrix<<<1, 1>>>(d_buffer, N, B);
-            // cudaDeviceSynchronize();
         }
-        // checkCudaErrors(cudaMemcpy(h_L, d_matrix, N * N * sizeof(double), cudaMemcpyDeviceToHost));
         memset(h_U, 0, N * N * sizeof(double));
         cleanCusolverLUDecompositionResult(h_L, h_U, N);
-        printf("Result passes verification: %d\n", verifyLUDecomposition(originalMatrix.get(), h_L, h_U, N));
+        printf("Result passes verification: %d\n", verifyLUDecomposition(originalMatrix.get(), h_L, h_U, N, verbose));
 
         free(h_L);
         free(h_U);
@@ -898,7 +558,6 @@ void tiledLUPart(bool verify, bool dot)
     nvshmem_free(d_dependencies);
     checkCudaErrors(cudaFreeHost(h_dependencies));
     checkCudaErrors(cudaFree(d_info));
-    // checkCudaErrors(cudaFree(h_workspace));
     checkCudaErrors(cudaFree(d_workspace_cusolver));
     for (int i = 0; i < workspaces; i++)
     {
@@ -910,80 +569,43 @@ int main(int argc, char **argv)
 {
     auto cmdl = argh::parser(argc, argv);
 
-    if (!(cmdl({"N", "n"}, N) >> N))
-    {
-        std::cerr << "Must provide a valid N value! Got '" << cmdl({"N", "n"}).str() << "'" << std::endl;
-        return 0;
-    }
-    if (!(cmdl({"t", "T"}, T) >> T))
-    {
-        std::cerr << "Must provide a valid T value! Got '" << cmdl({"T", "t"}).str() << "'" << std::endl;
-        return 0;
-    }
-    if (N % T > 0)
-    {
-        std::cerr << "N must be divisible by T! Got 'N=" << N << " & T=" << T << "'" << std::endl;
-        return 0;
-    }
-    if (!(cmdl({"sm", "SM", "smLimit"}, smLimit) >> smLimit) || smLimit > 108 || smLimit < 1)
-    {
-        std::cerr << "Must provide a valid SM Limit value! Got '" << cmdl({"sm", "SM", "smLimit"}).str() << "'" << std::endl;
-        return 0;
-    }
-    if (!(cmdl({"workspace", "ws", "w", "W"}, workspace) >> workspace) || workspace > 1024 * 1024 || workspace < 1)
-    {
-        std::cerr << "Must provide a valid workspace (in kBytes) value! Got '" << cmdl({"workspace", "ws", "w"}).str() << "'" << std::endl;
-        return 0;
-    }
-    if (!(cmdl({"run", "runs", "r", "R"}, runs) >> runs) || runs < 1)
-    {
-        std::cerr << "Must provide a valid number of runs! Got '" << cmdl({"run", "r", "R"}).str() << "'" << std::endl;
-        return 0;
-    }
-    if (!(cmdl({"p", "P"}, nodeToPrint) >> nodeToPrint) || nodeToPrint < -1)
-    {
-        std::cerr << "Unknown" << std::endl;
-        return 0;
+    if (!parseCommonArgs(cmdl, cfg)) {
+        printPartitionedUsage(argv[0]);
+        return 1;
     }
 
+    if (!(cmdl({"p", "P"}, nodeToPrint) >> nodeToPrint) || nodeToPrint < -1) {
+        std::cerr << "Must provide a valid node-to-print value!" << std::endl;
+        return 1;
+    }
+
+    // Partitioned LU uses global PE ids (nvshmem_my_pe) rather than node-local ids.
     nvshmem_init();
     myPE = nvshmem_my_pe();
     myNodePE = nvshmem_team_my_pe(NVSHMEMX_TEAM_NODE);
     nPE = nvshmem_n_pes();
     checkCudaErrors(cudaSetDevice(myNodePE));
 
-    int gpusAvailable = -1;
-    checkCudaErrors(cudaGetDeviceCount(&gpusAvailable));
     verbose = cmdl[{"v", "verbose"}] && myPE == 0;
 
-    // if (verbose) {
-    printf("Hello from NVSHMEM_PE=%d/%d\n", myPE, nPE);
-    // printf("%d GPUs detected, asked to use use %d GPUs\n", gpusAvailable, nPE);
-    // }
-    // if (gpusAvailable < nPE)
-    //     nPE = gpusAvailable;
+    if (verbose)
+        printf("Hello from NVSHMEM_PE=%d/%d\n", myPE, nPE);
 
     B = N / T;
 
-    if (myPE == 0)
-    {
-        std::cout << " with N=" << N << " (" << T << " of " << B << "x" << B << " tiles)" << std::endl;
+    if (myPE == 0) {
+        std::cout << "PARTITIONED LU with N=" << N << " (" << T << " of " << B << "x" << B << " tiles)" << std::endl;
         std::cout << "SM Limit per kernel = " << smLimit << std::endl;
         std::cout << "cuBLAS workspace = " << workspace << " kB" << std::endl;
     }
 
-    if (nPE < 2)
-    {
-        std::cout << "ONLY WORKS FOR MULTI-GPU! RUN WITH MULTIPLE MPI PROCESSES" << std::endl;
-        return 0;
+    if (nPE < 2) {
+        std::cerr << "Partitioned LU requires multiple GPUs. Run with multiple MPI processes." << std::endl;
+        return 1;
     }
 
     tiledLUPart(cmdl["verify"] && myPE == 0, cmdl["dot"]);
-    // testLUPart(cmdl["verify"] && myPE==0, cmdl["dot"]);
 
     nvshmem_finalize();
-
     return 0;
 }
-
-// nvcc lu_partg_nvshmem.cu -I${NVSHMEM_PATH}/include -L${NVSHMEM_PATH}/lib -lcublas -lcusolver -lnvshmem -lnvidia-ml -o nvshmem_lu

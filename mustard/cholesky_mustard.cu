@@ -13,72 +13,21 @@
 #include <utility>
 
 #include "argh.h"
+#include "cli.h"
+#include "gen.h"
 #include "mustard.h"
+#include "verify.h"
 
-size_t N = 15 * 1;
-size_t B = N / 5;
-size_t T = N / B;
+// Global configuration (populated from CLI in main).
+static MustardConfig cfg;
+static size_t& N = cfg.N;
+static size_t& B = cfg.B;
+static size_t& T = cfg.T;
 int myPE;
-int verbose = 0;
-int workspace = 1;
-int smLimit = 10;
-int runs = 1;
-
-// Set upper triangle entries (excluding diagonal entries) in column-major order to zero.
-// Then, transpose to row-major order.
-void cleanCusolverCholeskyDecompositionResult(double *L, const int n)
-{
-    for (int i = 0; i < n; i++)
-    {
-        for (int j = i + 1; j < n; j++)
-        {
-            L[i + j * n] = 0;
-            std::swap(L[i + j * n], L[i * n + j]);
-        }
-    }
-}
-
-bool verifyCholeskyDecomposition(double *A, double *L, const int n)
-{
-    auto newA = std::make_unique<double[]>(n * n);
-    memset(newA.get(), 0, n * n * sizeof(double));
-    for (int i = 0; i < n; i++)
-    {
-        for (int j = 0; j < n; j++)
-        {
-            for (int k = 0; k < n; k++)
-            {
-                newA[i * n + j] += L[i * n + k] * L[k + j * n];
-            }
-        }
-    }
-
-    double error = 0;
-    for (int i = 0; i < n; i++)
-    {
-        for (int j = 0; j < n; j++)
-        {
-            error += fabs(A[i * n + j] - newA[i * n + j]);
-        }
-    }
-
-
-    if (verbose) {
-        printf("A:\n");
-        printSquareMatrix(A, n);
-
-        printf("\nnewA:\n");
-        printSquareMatrix(newA.get(), n);
-
-        printf("\nL:\n");
-        printSquareMatrix(L, n);
-        printf("\n");
-    }
-
-    printf("error = %.6f}\n", error);
-
-    return error <= 1e-6;
-}
+static int& verbose = cfg.verbose;
+static int& workspace = cfg.workspace;
+static int& smLimit = cfg.smLimit;
+static int& runs = cfg.runs;
 
 void trivialCholesky(bool verify)
 {
@@ -169,7 +118,7 @@ void trivialCholesky(bool verify)
         double *h_L = (double *)malloc(N * N * sizeof(double));
         checkCudaErrors(cudaMemcpy(h_L, d_A, N * N * sizeof(double), cudaMemcpyDeviceToHost));
         cleanCusolverCholeskyDecompositionResult(h_L, N);
-        printf("Result passes verification: %d\n", verifyCholeskyDecomposition(h_A, h_L, N));
+        printf("Result passes verification: %d\n", verifyCholeskyDecomposition(h_A, h_L, N, verbose));
         free(h_L);
     }
 
@@ -217,29 +166,12 @@ void tiledCholesky(bool verify, bool subgraph, bool dot)
     checkCudaErrors(cusolverDnCreate(&cusolverDnHandle));
     checkCudaErrors(cusolverDnCreateParams(&cusolverDnParams));
     checkCudaErrors(cublasCreate(&cublasHandle));
-    // checkCudaErrors(cublasLoggerConfigure(verbose, verbose, 0, NULL));
-    // checkCudaErrors(cublasSetSmCountTarget(cublasHandle, smLimit));
-
     // Prepare constants
     double one = 1.0;
     double minusOne = -1.0;
 
     // Prepare buffer for potrf
-    // size_t workspaceInBytesOnDevice, workspaceInBytesOnHost;
     int workspaceInBytesOnDevice;
-        
-    // checkCudaErrors(cusolverDnXpotrf_bufferSize(
-    //     cusolverDnHandle,
-    //     cusolverDnParams,
-    //     CUBLAS_FILL_MODE_LOWER,
-    //     B,
-    //     CUDA_R_64F,
-    //     d_matrix,
-    //     N,
-    //     CUDA_R_64F,
-    //     &workspaceInBytesOnDevice,
-    //     &workspaceInBytesOnHost));
-        
 
     checkCudaErrors(cusolverDnDpotrf_bufferSize(
                     cusolverDnHandle,
@@ -249,19 +181,13 @@ void tiledCholesky(bool verify, bool subgraph, bool dot)
                     N,
                     &workspaceInBytesOnDevice));
 
-    // void *h_workspace, *d_workspace_cusolver;
     double *d_workspace_cusolver;
-    int workspaces = T*T;//(T-1)*(T-1);
+    int workspaces = T*T;
     void **d_workspace_cublas = (void **)malloc(sizeof(void *)*workspaces);
     int *d_info;
     workspaceInBytesOnDevice*=8;
-    // checkCudaErrors(cudaMalloc(&h_workspace, workspaceInBytesOnHost));
     checkCudaErrors(cudaMalloc(&d_workspace_cusolver, workspaceInBytesOnDevice));
-    int cublasWorkspaceSize = 1024*workspace; // (B/256+1)*B*256*4;
-
-    // while (cublasWorkspaceSize * T >= 1024*1024*2 - workspaceInBytesOnDevice) {
-    //     cublasWorkspaceSize = cublasWorkspaceSize >> 1;
-    // }
+    int cublasWorkspaceSize = 1024*workspace;
 
     for (int i = 0; i < workspaces; i++) {
         checkCudaErrors(cudaMalloc(&d_workspace_cublas[i], cublasWorkspaceSize));
@@ -284,7 +210,6 @@ void tiledCholesky(bool verify, bool subgraph, bool dot)
     }
 
     cudaStream_t s;
-    checkCudaErrors(cudaStreamCreate(&s));
     checkCudaErrors(cudaStreamCreate(&s));
 
     checkCudaErrors(cusolverDnSetStream(cusolverDnHandle, s));
@@ -319,20 +244,6 @@ void tiledCholesky(bool verify, bool subgraph, bool dot)
             d_workspace_cusolver,
             workspaceInBytesOnDevice,
             d_info));
-        // checkCudaErrors(cusolverDnXpotrf(
-        //     cusolverDnHandle,
-        //     cusolverDnParams,
-        //     CUBLAS_FILL_MODE_LOWER,
-        //     B,
-        //     CUDA_R_64F,
-        //     getMatrixBlock(d_matrix, k, k),
-        //     N,
-        //     CUDA_R_64F,
-        //     d_workspace,
-        //     workspaceInBytesOnDevice,
-        //     NULL,
-        //     0,
-        //     d_info));
         if (subgraph) {
             if (myPE != 0) cudaMemcpy2DAsync(getMatrixBlock(d_matrix_remote, k, k), 
                                             sizeof(double) * N,
@@ -389,7 +300,6 @@ void tiledCholesky(bool verify, bool subgraph, bool dot)
             tiledCholeskyGraphCreator->endCaptureOperation();
 
         }
-        // checkCudaErrors(cublasSetWorkspace(cublasHandle, d_workspace_cublas[0], cublasWorkspaceSize));
 
         for (int i = k + 1; i < T; i++)
         {
@@ -506,28 +416,18 @@ void tiledCholesky(bool verify, bool subgraph, bool dot)
         BrokerWorkDistributor queue(queue_size);
         if (verbose) std::cout << "Allocating memory..." << std::endl;
 
-        // checkCudaErrors(cudaMalloc(&d_flags, sizeof(int) * 32));
-        // checkCudaErrors(cudaMalloc(&d_dependencies, sizeof(int) * totalNodes));
-
         int *d_dependencies = (int *) nvshmem_malloc(sizeof(int) * totalNodes);
         checkCudaErrors(cudaMallocHost(&h_dependencies, sizeof(int) * totalNodes));
         if (verbose) std::cout << "Setting dependencies..." << std::endl;
 
-        
         for (int i = 0; i < totalNodes; i++)
         {
             h_dependencies[i] = tiledCholeskyGraphCreator->subgraphDependencies[i].size();
-            // std::cout << h_dependencies[i] << " ";
         }
         if (verbose) std::cout << "Populating the queue..." << std::endl;
-        // std::cout << std::endl;
 
         checkCudaErrors(cudaMemcpy((void *)d_dependencies, (void *)h_dependencies, 
                                 sizeof(int) * totalNodes, cudaMemcpyHostToDevice));
-        // if (myPE == 0)
-        //     mustard::kernel_populate_queue<<<108, 1024>>>(queue, d_dependencies, totalNodes);
-        // if (myPE == 0)
-        //     mustard::kernel_test_dequeue<<<1, 1>>>(queue);
         if (myPE == 0)
             mustard::kernel_populate_queue<<<108, 1024>>>(queue, d_dependencies, totalNodes);
         checkCudaErrors(cudaDeviceSynchronize());
@@ -536,8 +436,7 @@ void tiledCholesky(bool verify, bool subgraph, bool dot)
         for (int dst = 0; dst < totalNodes; dst++)
             for (int src_ind = 0; src_ind < h_dependencies[dst]; src_ind++) 
                 tiledCholeskyGraphCreator->insertDependencyKernel(tiledCholeskyGraphCreator->subgraphDependencies[dst][src_ind], 
-                                                            dst, queue, d_dependencies);//, smLimit, d_flags);
-        // checkCudaErrors(cudaGraphDebugDotPrint(graph, "./graph.dot", 0));
+                                                            dst, queue, d_dependencies);
         if (verbose) showMemUsage();
         if (verbose) std::cout << "Uploading graphs..." << std::endl;
 
@@ -617,7 +516,7 @@ void tiledCholesky(bool verify, bool subgraph, bool dot)
         double *h_L = (double *)malloc(N * N * sizeof(double));
         checkCudaErrors(cudaMemcpy(h_L, d_matrix, N * N * sizeof(double), cudaMemcpyDeviceToHost));
         cleanCusolverCholeskyDecompositionResult(h_L, N);
-        printf("Result passes verification: %d\n", verifyCholeskyDecomposition(originalMatrix.get(), h_L, N));
+        printf("Result passes verification: %d\n", verifyCholeskyDecomposition(originalMatrix.get(), h_L, N, verbose));
 
         free(h_L);
     }
@@ -626,13 +525,10 @@ void tiledCholesky(bool verify, bool subgraph, bool dot)
     if (!subgraph) checkCudaErrors(cudaFree(d_matrix));
     else nvshmem_free(d_matrices);
     checkCudaErrors(cudaFree(d_info));
-    // checkCudaErrors(cudaFree(h_workspace));
     checkCudaErrors(cudaFree(d_workspace_cusolver));
     for (int i = 0; i < workspaces; i++) {
         checkCudaErrors(cudaFree(d_workspace_cublas[i]));
     }
-    // (*queue).free_mem();
-    // delete queue;
 }
 
 void Cholesky(bool tiled, bool verify, bool subgraph, bool dot)
@@ -649,44 +545,13 @@ int main(int argc, char **argv)
 {
     auto cmdl = argh::parser(argc, argv);
 
-    if (!(cmdl({"N", "n"}, N) >> N)) {
-        std::cerr << "Must provide a valid N value! Got '" << cmdl({"N", "n"}).str() << "'" << std::endl;
-        return 0;
-    }
-    if (!(cmdl({"t", "T"}, T) >> T)) {
-        std::cerr << "Must provide a valid T value! Got '" << cmdl({"T", "t"}).str() << "'" << std::endl;
-        return 0;
-    }
-    if (N % T > 0) {
-        std::cerr << "N must be divisible by T! Got 'N=" << N << " & T=" << T << "'" << std::endl;
-        return 0;
-    }
-    if (!(cmdl({"sm", "SM", "smLimit"}, smLimit) >> smLimit) || smLimit > 108 || smLimit < 1) {
-        std::cerr << "Must provide a valid SM Limit value! Got '" << cmdl({"sm", "SM", "smLimit"}).str() << "'" << std::endl;
-        return 0;
-    }
-    if (!(cmdl({"workspace", "ws", "w", "W"}, workspace) >> workspace) || workspace > 1024*1024 || workspace < 1) {
-        std::cerr << "Must provide a valid workspace (in kBytes) value! Got '" << cmdl({"workspace", "ws", "w"}).str() << "'" << std::endl;
-        return 0;
-    }
-    if (!(cmdl({"run", "runs", "r", "R"}, runs) >> runs) || runs < 1) {
-        std::cerr << "Must provide a valid number of runs! Got '" << cmdl({"run", "r", "R"}).str() << "'" << std::endl;
-        return 0;
+    if (!parseCommonArgs(cmdl, cfg)) {
+        printSingleNodeUsage(argv[0], "Cholesky");
+        return 1;
     }
 
-    nvshmem_init();
-
-    myPE = nvshmem_team_my_pe(NVSHMEMX_TEAM_NODE);
-    checkCudaErrors(cudaSetDevice(myPE));
-
-    int gpusAvailable = -1;
-    checkCudaErrors(cudaGetDeviceCount(&gpusAvailable));
-    verbose = cmdl[{"v", "verbose"}] && myPE == 0;
-
-    if (verbose) {
-        printf("Hello from NVSHMEM_PE=%d/%d\n", myPE, nvshmem_n_pes());
-        printf("%d GPUs detected, asked to use use %d GPUs\n", gpusAvailable, nvshmem_n_pes());
-    }
+    initNvshmemDevice(cmdl, cfg);
+    myPE = cfg.myPE;
 
     if (!(cmdl["tiled"] || cmdl["subgraph"]))
         T = 1;
@@ -697,9 +562,8 @@ int main(int argc, char **argv)
             std::cout << "TILED";
         else if (cmdl["subgraph"])
             std::cout << "SUBGRAPH";
-        else {
+        else
             std::cout << "Single-kernel";
-        }
         std::cout << " with N=" << N << " (" << T << " of " << B << "x" << B << " tiles)" << std::endl;
 
         if (cmdl[{"subgraph", "tiled"}]) {
@@ -708,11 +572,8 @@ int main(int argc, char **argv)
         }
     }
 
-    Cholesky(cmdl["tiled"], cmdl["verify"] && myPE==0, cmdl["subgraph"], cmdl["dot"]);
+    Cholesky(cmdl["tiled"], cmdl["verify"] && myPE == 0, cmdl["subgraph"], cmdl["dot"]);
     
     nvshmem_finalize();
-
     return 0;
 }
-
-// nvcc lu_partg_nvshmem.cu -I${NVSHMEM_PATH}/include -L${NVSHMEM_PATH}/lib -lcublas -lcusolver -lnvshmem -lnvidia-ml -o nvshmem_lu

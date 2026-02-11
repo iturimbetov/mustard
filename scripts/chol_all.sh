@@ -1,11 +1,4 @@
 #!/bin/bash
-#SBATCH --job-name=chol_collect_8gpu_starpu
-#SBATCH -p palamut-cuda
-#SBATCH -N 1
-#SBATCH -c 128
-#SBATCH --gres=gpu:8
-#SBATCH --time=6:00:00
-#SBATCH --export=ALL
 
 # TODO
 helpFunction()
@@ -110,7 +103,7 @@ do
                             &>> $outfolder/log2_$N\_$T\_$g\GPU.log  ; 
                     fi
                     if [ $method -eq -1 ] || [ $method -eq 4 ]; then
-                        $timeoutcmd $MG_SAMPLES_DIR/cusolver_MgPotrf_example1 \
+                        $timeoutcmd $MG_SAMPLES_DIR/cusolver_MgPotrf_example \
                             -N=$N -B=$B -r=$runs \
                             &>> $outfolder/log3_$N\_$T\_$g\GPU.log ; 
                     fi
@@ -146,7 +139,7 @@ do
                     &>> $outfolder/log2_$N\_$T\_$g\GPU.log  ; 
             fi
             if [ $method -eq -1 ] || [ $method -eq 4 ]; then
-                $timeoutcmd $MG_SAMPLES_DIR/cusolver_MgPotrf_example1 \
+                $timeoutcmd $MG_SAMPLES_DIR/cusolver_MgPotrf_example \
                     -N=$N -B=$B -r=$runs \
                     &>> $outfolder/log3_$N\_$T\_$g\GPU.log ; 
             fi

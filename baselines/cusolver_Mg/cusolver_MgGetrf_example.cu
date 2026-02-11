@@ -59,6 +59,7 @@
 
 #include "cusolverMg_utils.h"
 #include "cusolver_utils.h"
+#include "gen.h"
 #include "argh.h"
 #include "utils.h"
 

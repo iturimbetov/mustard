@@ -1,11 +1,4 @@
 #!/bin/bash
-#SBATCH --job-name=lu_collect_8gpu
-#SBATCH -p palamut-cuda
-#SBATCH -N 1
-#SBATCH -c 128
-#SBATCH --gres=gpu:8
-#SBATCH --time=6:00:00
-#SBATCH --export=ALL
 
 # TODO
 helpFunction()

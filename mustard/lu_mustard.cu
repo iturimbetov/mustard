@@ -13,82 +13,21 @@
 #include <utility>
 
 #include "argh.h"
+#include "cli.h"
+#include "gen.h"
 #include "mustard.h"
+#include "verify.h"
 
-#define FLAGS_SUBG_COUNT 0
-#define FLAGS_OCCUP 4
-#define MAX_TILE 4000
-
-size_t N = 15 * 1;
-size_t B = N / 5;
-size_t T = N / B;
+// Global configuration (populated from CLI in main).
+static MustardConfig cfg;
+static size_t& N = cfg.N;
+static size_t& B = cfg.B;
+static size_t& T = cfg.T;
 int myPE;
-int verbose = 0;
-int workspace = 256;
-int smLimit = 20;
-int runs = 1;
-
-// Set upper triangle entries (excluding diagonal entries) in column-major order to zero.
-// Then, transpose to row-major order.
-void cleanCusolverLUDecompositionResult(double *L, double *U, const int n)
-{
-    for (int i = 0; i < n; i++)
-    {
-        for (int j = i; j < n; j++)
-        {
-            std::swap(L[i + j * n], L[i * n + j]);
-            U[i * n + j] = L[i * n + j];
-            L[i * n + j] = 0;
-        }
-        L[i * n + i] = 1;
-    }
-}
-
-bool verifyLUDecomposition(double *A, double *L, double *U, const int n)
-{
-    auto newA = std::make_unique<double[]>(n * n);
-    memset(newA.get(), 0, n * n * sizeof(double));
-    for (int i = 0; i < n; i++)
-    {
-        for (int j = 0; j < n; j++)
-        {
-            for (int k = 0; k < n; k++)
-            {
-                newA[i * n + j] += L[i * n + k] * U[k * n + j];
-            }
-        }
-    }
-
-    double error = 0;
-    for (int i = 0; i < n; i++)
-    {
-        for (int j = 0; j < n; j++)
-        {
-            error += fabs(A[i * n + j] - newA[i * n + j]);
-        }
-    }
-
-    if (verbose) {
-        printf("A:\n");
-        printSquareMatrix(A, n);
-
-        printf("\nnewA:\n");
-        printSquareMatrix(newA.get(), n);
-
-        printf("\nL:\n");
-        printSquareMatrix(L, n);
-        printf("\n");
-
-        printf("\nU:\n");
-        printSquareMatrix(U, n);
-        printf("\n");
-    }
-
-    printf("error = %.6f}\n", error);
-
-
-    return error <= 1e-6;
-}
+static int& verbose = cfg.verbose;
+static int& workspace = cfg.workspace;
+static int& smLimit = cfg.smLimit;
+static int& runs = cfg.runs;
 
 void trivialLU(bool verify)
 {
@@ -158,7 +97,6 @@ void trivialLU(bool verify)
         printf("device %d | %d run | time (s): %4.4f\n", myPE, i, time);
         totalTime += time;
     }
-    // Calculate
 
     // Check
     int h_info = 0;
@@ -175,7 +113,7 @@ void trivialLU(bool verify)
         double *h_U = (double *)malloc(N * N * sizeof(double));
         checkCudaErrors(cudaMemcpy(h_L, d_A, N * N * sizeof(double), cudaMemcpyDeviceToHost));
         cleanCusolverLUDecompositionResult(h_L, h_U, N);
-        printf("Result passes verification: %d\n", verifyLUDecomposition(h_A, h_L, h_U, N));
+        printf("Result passes verification: %d\n", verifyLUDecomposition(h_A, h_L, h_U, N, verbose));
 
         // Clean
         free(h_L);
@@ -254,8 +192,6 @@ cudaGraph_t recordSubgraph(double* subMatrix, int subT,
         {
             checkCudaErrors(cublasSetWorkspace(cublasHandle, d_workspace_cublas[i-1], cublasWorkspaceSize));
             // L[i][k] = TRSM(A[i][k], A[k][k]) // the U part of A[k][k]
-            // seems like only these need a separate workspace
-            // checkCudaErrors(cublasSetWorkspace(cublasHandle, d_workspace_cublas[i], cublasWorkspaceSize));
             tiledLUGraphCreator->beginCaptureOperation(
                 std::make_pair(k, i),
                 {std::make_pair(k, k), std::make_pair(k, i)});
@@ -272,7 +208,6 @@ cudaGraph_t recordSubgraph(double* subMatrix, int subT,
             tiledLUGraphCreator->endCaptureOperation();
 
         }
-        // checkCudaErrors(cublasSetWorkspace(cublasHandle, d_workspace_cublas[0], cublasWorkspaceSize));
 
         for (int i = k + 1; i < subT; i++)
         {
@@ -352,37 +287,13 @@ void tiledLU(bool verify, bool subgraph, bool dot)
     checkCudaErrors(cusolverDnCreate(&cusolverDnHandle));
     checkCudaErrors(cusolverDnCreateParams(&cusolverDnParams));
     checkCudaErrors(cublasCreate(&cublasHandle));
-    // checkCudaErrors(cublasLoggerConfigure(verbose, verbose, 0, NULL));
-    // if (subgraph)
-    // if (smLimit*T >= 108) {
-    //     while (smLimit*T >= 108)
-    //         smLimit -= 1;
-    //     if (verbose)
-    //         std::cout << "smLimit changed to " << smLimit << std::endl;
-    // }
-        
     checkCudaErrors(cublasSetSmCountTarget(cublasHandle, smLimit));
 
     // Prepare constants
     double one = 1.0;
     double minusOne = -1.0;
 
-    // Prepare buffer for potrf
-    // size_t workspaceInBytesOnDevice, workspaceInBytesOnHost;
     int workspaceInBytesOnDevice;
-        
-    // checkCudaErrors(cusolverDnXgetrf_bufferSize(
-    //     cusolverDnHandle,
-    //     cusolverDnParams,
-    //     B,
-    //     B,
-    //     CUDA_R_64F,
-    //     d_matrix,
-    //     N,
-    //     CUDA_R_64F,
-    //     &workspaceInBytesOnDevice,
-    //     &workspaceInBytesOnHost));
-        
 
     checkCudaErrors(cusolverDnDgetrf_bufferSize(
                     cusolverDnHandle,
@@ -392,19 +303,13 @@ void tiledLU(bool verify, bool subgraph, bool dot)
                     N,
                     &workspaceInBytesOnDevice));
 
-    // void *h_workspace, *d_workspace_cusolver;
     double *d_workspace_cusolver;
     int workspaces = T*T;
     void **d_workspace_cublas = (void **)malloc(sizeof(void *)*workspaces);
     int *d_info;
     workspaceInBytesOnDevice*=8;
-    // checkCudaErrors(cudaMalloc(&h_workspace, workspaceInBytesOnHost));
     checkCudaErrors(cudaMalloc(&d_workspace_cusolver, workspaceInBytesOnDevice));
-    int cublasWorkspaceSize = 1024*workspace; // (B/256+1)*B*256*4;
-
-    // while (cublasWorkspaceSize * T >= 1024*1024*2 - (workspaceInBytesOnDevice*8)) {
-    //     cublasWorkspaceSize = cublasWorkspaceSize >> 1;
-    // }
+    int cublasWorkspaceSize = 1024*workspace;
 
     for (int i = 0; i < workspaces; i++) {
         checkCudaErrors(cudaMalloc(&d_workspace_cublas[i], cublasWorkspaceSize));
@@ -462,21 +367,6 @@ void tiledLU(bool verify, bool subgraph, bool dot)
                 d_workspace_cusolver,
                 NULL,
                 d_info));
-        // checkCudaErrors(cusolverDnXgetrf(
-        //     cusolverDnHandle,
-        //     cusolverDnParams,
-        //     B,
-        //     B,
-        //     CUDA_R_64F,
-        //     getMatrixBlock(d_matrix, k, k),
-        //     N,
-        //     NULL, // no pivoting
-        //     CUDA_R_64F,
-        //     d_workspace_cusolver,
-        //     workspaceInBytesOnDevice,
-        //     NULL,
-        //     0,
-        //     d_info));
         if (subgraph) {
             if (myPE != 0) cudaMemcpy2DAsync(getMatrixBlock(d_matrix_remote, k, k), 
                                             sizeof(double) * N,
@@ -542,13 +432,11 @@ void tiledLU(bool verify, bool subgraph, bool dot)
             tiledLUGraphCreator->endCaptureOperation();
 
         }
-        //checkCudaErrors(cublasSetWorkspace(cublasHandle, d_workspace_cublas[0], cublasWorkspaceSize));
 
         for (int i = k + 1; i < T; i++)
         {
             // U[k][i] = TRSM(A[k][k], A[k][i]) // the L part of A[k][k]
             checkCudaErrors(cublasSetWorkspace(cublasHandle, d_workspace_cublas[T+i], cublasWorkspaceSize));
-            // checkCudaErrors(cublasSetWorkspace(cublasHandle, d_workspace_cublas[i-1 + T], cublasWorkspaceSize));
             tiledLUGraphCreator->beginCaptureOperation(
                 std::make_pair(i, k),
                 {std::make_pair(k, k), std::make_pair(i, k)});
@@ -655,20 +543,12 @@ void tiledLU(bool verify, bool subgraph, bool dot)
     if (subgraph) {
         if (verbose)
             tiledLUGraphCreator->printDeps();
-        // char filename1[20];
-        // sprintf(filename1, "./graph_%d_PE%d.dot", 0, myPE);
-        // if (dot)
-        //     checkCudaErrors(cudaGraphDebugDotPrint(tiledLUGraphCreator->subgraphs[0], filename1, 0));
-        
-        // volatile int *d_flags;
-        int *h_dependencies; //, *d_dependencies;
+
+        int *h_dependencies;
         const int queue_size = totalNodes * 2;
         if (verbose) std::cout << "Creating queue..." << std::endl;
         BrokerWorkDistributor queue(queue_size);
         if (verbose) std::cout << "Allocating memory..." << std::endl;
-
-        // checkCudaErrors(cudaMalloc(&d_flags, sizeof(int) * 32));
-        // checkCudaErrors(cudaMalloc(&d_dependencies, sizeof(int) * totalNodes));
 
         int *d_dependencies = (int *) nvshmem_malloc(sizeof(int) * totalNodes);
         checkCudaErrors(cudaMallocHost(&h_dependencies, sizeof(int) * totalNodes));
@@ -678,17 +558,11 @@ void tiledLU(bool verify, bool subgraph, bool dot)
         for (int i = 0; i < totalNodes; i++)
         {
             h_dependencies[i] = tiledLUGraphCreator->subgraphDependencies[i].size();
-            //std::cout << h_dependencies[i] << " ";
         }
         if (verbose) std::cout << "Populating the queue..." << std::endl;
-        // std::cout << std::endl;
 
         checkCudaErrors(cudaMemcpy((void *)d_dependencies, (void *)h_dependencies, 
                                 sizeof(int) * totalNodes, cudaMemcpyHostToDevice));
-        // if (myPE == 0)
-        //     mustard::kernel_populate_queue<<<108, 1024>>>(queue, d_dependencies, totalNodes);
-        // if (myPE == 0)
-        //     mustard::kernel_test_dequeue<<<1, 1>>>(queue);
         if (myPE == 0)
             mustard::kernel_populate_queue<<<108, 1024>>>(queue, d_dependencies, totalNodes);
         checkCudaErrors(cudaDeviceSynchronize());
@@ -697,8 +571,7 @@ void tiledLU(bool verify, bool subgraph, bool dot)
         for (int dst = 0; dst < totalNodes; dst++)
             for (int src_ind = 0; src_ind < h_dependencies[dst]; src_ind++) 
                 tiledLUGraphCreator->insertDependencyKernel(tiledLUGraphCreator->subgraphDependencies[dst][src_ind], 
-                                                            dst, queue, d_dependencies);//, smLimit, d_flags);
-        // checkCudaErrors(cudaGraphDebugDotPrint(graph, "./graph.dot", 0));
+                                                            dst, queue, d_dependencies);
         if (verbose) showMemUsage();
         if (verbose) std::cout << "Uploading graphs..." << std::endl;
 
@@ -780,7 +653,7 @@ void tiledLU(bool verify, bool subgraph, bool dot)
         checkCudaErrors(cudaMemcpy(h_L, d_matrix, N * N * sizeof(double), cudaMemcpyDeviceToHost));
         memset(h_U, 0, N * N * sizeof(double));
         cleanCusolverLUDecompositionResult(h_L, h_U, N);
-        printf("Result passes verification: %d\n", verifyLUDecomposition(originalMatrix.get(), h_L, h_U, N));
+        printf("Result passes verification: %d\n", verifyLUDecomposition(originalMatrix.get(), h_L, h_U, N, verbose));
 
         free(h_L);
         free(h_U);
@@ -790,13 +663,10 @@ void tiledLU(bool verify, bool subgraph, bool dot)
     if (!subgraph) checkCudaErrors(cudaFree(d_matrix));
     else nvshmem_free(d_matrices);
     checkCudaErrors(cudaFree(d_info));
-    // checkCudaErrors(cudaFree(h_workspace));
     checkCudaErrors(cudaFree(d_workspace_cusolver));
     for (int i = 0; i < workspaces; i++) {
         checkCudaErrors(cudaFree(d_workspace_cublas[i]));
     }
-    // (*queue).free_mem();
-    // delete queue;
 }
 
 void LU(bool tiled, bool verify, bool subgraph, bool dot)
@@ -813,44 +683,13 @@ int main(int argc, char **argv)
 {
     auto cmdl = argh::parser(argc, argv);
 
-    if (!(cmdl({"N", "n"}, N) >> N)) {
-        std::cerr << "Must provide a valid N value! Got '" << cmdl({"N", "n"}).str() << "'" << std::endl;
-        return 0;
-    }
-    if (!(cmdl({"t", "T"}, T) >> T)) {
-        std::cerr << "Must provide a valid T value! Got '" << cmdl({"T", "t"}).str() << "'" << std::endl;
-        return 0;
-    }
-    if (N % T > 0) {
-        std::cerr << "N must be divisible by T! Got 'N=" << N << " & T=" << T << "'" << std::endl;
-        return 0;
-    }
-    if (!(cmdl({"sm", "SM", "smLimit"}, smLimit) >> smLimit) || smLimit > 108 || smLimit < 1) {
-        std::cerr << "Must provide a valid SM Limit value! Got '" << cmdl({"sm", "SM", "smLimit"}).str() << "'" << std::endl;
-        return 0;
-    }
-    if (!(cmdl({"workspace", "ws", "w", "W"}, workspace) >> workspace) || workspace > 1024*1024 || workspace < 1) {
-        std::cerr << "Must provide a valid workspace (in kBytes) value! Got '" << cmdl({"workspace", "ws", "w"}).str() << "'" << std::endl;
-        return 0;
-    }
-    if (!(cmdl({"run", "runs", "r", "R"}, runs) >> runs) || runs < 1) {
-        std::cerr << "Must provide a valid number of runs! Got '" << cmdl({"run", "r", "R"}).str() << "'" << std::endl;
-        return 0;
+    if (!parseCommonArgs(cmdl, cfg)) {
+        printSingleNodeUsage(argv[0], "LU");
+        return 1;
     }
 
-    nvshmem_init();
-
-    myPE = nvshmem_team_my_pe(NVSHMEMX_TEAM_NODE);
-    checkCudaErrors(cudaSetDevice(myPE));
-
-    int gpusAvailable = -1;
-    checkCudaErrors(cudaGetDeviceCount(&gpusAvailable));
-    verbose = cmdl[{"v", "verbose"}] && myPE == 0;
-
-    if (verbose) {
-        printf("Hello from NVSHMEM_PE=%d/%d\n", myPE, nvshmem_n_pes());
-        printf("%d GPUs detected, asked to use use %d GPUs\n", gpusAvailable, nvshmem_n_pes());
-    }
+    initNvshmemDevice(cmdl, cfg);
+    myPE = cfg.myPE;
 
     if (!(cmdl["tiled"] || cmdl["subgraph"]))
         T = 1;
@@ -861,9 +700,8 @@ int main(int argc, char **argv)
             std::cout << "TILED";
         else if (cmdl["subgraph"])
             std::cout << "SUBGRAPH";
-        else {
+        else
             std::cout << "Single-kernel";
-        }
         std::cout << " with N=" << N << " (" << T << " of " << B << "x" << B << " tiles)" << std::endl;
 
         if (cmdl[{"subgraph", "tiled"}]) {
@@ -872,11 +710,8 @@ int main(int argc, char **argv)
         }
     }
 
-    LU(cmdl["tiled"], cmdl["verify"] && myPE==0, cmdl["subgraph"], cmdl["dot"]);
+    LU(cmdl["tiled"], cmdl["verify"] && myPE == 0, cmdl["subgraph"], cmdl["dot"]);
     
     nvshmem_finalize();
-
     return 0;
 }
-
-// nvcc lu_partg_nvshmem.cu -I${NVSHMEM_PATH}/include -L${NVSHMEM_PATH}/lib -lcublas -lcusolver -lnvshmem -lnvidia-ml -o nvshmem_lu

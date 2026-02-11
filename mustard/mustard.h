@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cuda_runtime.h>
 #include <cuda_runtime_api.h>
 
@@ -16,6 +18,35 @@
 
 #define FLAGS_SUBG_COUNT 0
 #define FLAGS_OCCUP 4
+#define MAX_TILE 4000
+
+// ---------- CUDA Graph API compatibility (12.x vs 13.0+) ----------
+// CUDA 13.0 changed signatures of several graph functions to require a
+// cudaGraphEdgeData* parameter; the old overloads were removed.
+// These wrappers let the code compile with both API versions.
+#if CUDART_VERSION >= 13000
+#define MUSTARD_cudaGraphNodeGetDependentNodes(node, out, cnt) \
+    cudaGraphNodeGetDependentNodes((node), (out), nullptr, (cnt))
+#define MUSTARD_cudaGraphNodeGetDependencies(node, out, cnt) \
+    cudaGraphNodeGetDependencies((node), (out), nullptr, (cnt))
+#define MUSTARD_cudaGraphGetEdges(g, from, to, cnt) \
+    cudaGraphGetEdges((g), (from), (to), nullptr, (cnt))
+#define MUSTARD_cudaGraphAddDependencies(g, from, to, cnt) \
+    cudaGraphAddDependencies((g), (from), (to), nullptr, (cnt))
+#define MUSTARD_cudaGraphRemoveDependencies(g, from, to, cnt) \
+    cudaGraphRemoveDependencies((g), (from), (to), nullptr, (cnt))
+#else
+#define MUSTARD_cudaGraphNodeGetDependentNodes(node, out, cnt) \
+    cudaGraphNodeGetDependentNodes((node), (out), (cnt))
+#define MUSTARD_cudaGraphNodeGetDependencies(node, out, cnt) \
+    cudaGraphNodeGetDependencies((node), (out), (cnt))
+#define MUSTARD_cudaGraphGetEdges(g, from, to, cnt) \
+    cudaGraphGetEdges((g), (from), (to), (cnt))
+#define MUSTARD_cudaGraphAddDependencies(g, from, to, cnt) \
+    cudaGraphAddDependencies((g), (from), (to), (cnt))
+#define MUSTARD_cudaGraphRemoveDependencies(g, from, to, cnt) \
+    cudaGraphRemoveDependencies((g), (from), (to), (cnt))
+#endif
 
 extern int myPE;
 
@@ -23,17 +54,9 @@ typedef std::pair<int, int> MatrixTile;
 
 namespace mustard {
     
-    __global__ void kernel_dep_wait(int *dependencies, //?: should it be volatile
-                                           int nodeIndex, 
-                                           int myPE)
+    __global__ void kernel_dep_wait(int *dependencies, int nodeIndex, int myPE)
     {
-        while (nvshmem_int_atomic_fetch(dependencies + nodeIndex, myPE) > 0) { 
-            // printf("PE %d Waiting for dependency of NODE %d, currently %d\n", 
-            //        myPE, nodeIndex, nvshmem_int_atomic_fetch(dependencies + nodeIndex, myPE));
-        } 
-        // nvshmem_quiet();
-        // printf("PE %d Waiting for dependency of NODE %d COMPLETED with value %d\n", 
-        //        myPE, nodeIndex, nvshmem_int_atomic_fetch(dependencies + nodeIndex, myPE));
+        while (nvshmem_int_atomic_fetch(dependencies + nodeIndex, myPE) > 0) { }
     }
     
     __global__ void kernel_dep_update_noq(int *dependencies, 
@@ -41,44 +64,24 @@ namespace mustard {
                                           int PE,
                                           int srcPE=-1)
     {
-        // nvshmem_quiet();
-        int old = nvshmem_int_atomic_fetch_add(dependencies + nodeIndex, -1, PE); 
-        // printf("Updating dependency of NODE %d on PE %d by %d, from %d to %d\n", 
-        //         nodeIndex, PE, srcPE, old, nvshmem_int_atomic_fetch(dependencies + nodeIndex, PE));
+        nvshmem_int_atomic_fetch_add(dependencies + nodeIndex, -1, PE);
     }
     
     __global__ void kernel_dep_update(BrokerWorkDistributor queue, 
                                              int *dependencies, 
                                              int nodeIndex)
     {
-        // int old = atomicAdd(dependencies + nodeIndex, -1);
         int old = nvshmem_int_atomic_fetch_add(dependencies + nodeIndex, -1, 0); // on PE 0
-        if (old == 1) { 
+        if (old == 1) {
             queue.enqueue(nodeIndex, 0);
         }
-        // printf("Updating dependency of NODE %d, from %d to %d\n", nodeIndex, old, nvshmem_int_atomic_fetch(dependencies + nodeIndex, 0));
     }
-        
-    // __global__ void kernel_dep_occup_update(BrokerWorkDistributor queue, int *dependencies, int nodeIndex, int sm_count, volatile int *flags)
-    // {
-    //     // int old = atomicAdd(dependencies + nodeIndex, -1);
-    //     int old = nvshmem_int_atomic_fetch_add(dependencies + nodeIndex, -1, 0); // on PE 0
-    //     if (old == 1) { // && dependencies[nodeIndex] == 0 {
-    //         queue.enqueue(nodeIndex, 0);
-    //     }
-    //     atomicAdd((int *)&flags[FLAGS_OCCUP], -sm_count);
-    //     printf("Updating dependency of NODE %d, from %d to %d | occup = %d\n", nodeIndex, old, nvshmem_int_atomic_fetch(dependencies + nodeIndex, 0), flags[FLAGS_OCCUP]);
-    // }
 
     // only 1 thread runs this
-    // thread_count is negative when occupancy is reduced after a kernel has been completed
+    // sm_count is negative when occupancy is reduced after a kernel has been completed
     __global__ void kernel_occupancy_update(int sm_count, volatile int *flags)
     {
-        // atomicAdd((int *)&flag, thread_count);
         atomicAdd((int *)&flags[FLAGS_OCCUP], sm_count);
-        // int old = atomicAdd((int *)&all_flags[device_id][FLAGS_OCCUP], thread_count);
-        // printf("Updating occupancy of GPU %d, from %d to %d\n", device_id, old, all_flags[device_id][FLAGS_OCCUP]);
-        // printf("Updating occupancy to %d\n", flags[FLAGS_OCCUP]);
     }
 
     __global__ void kernel_populate_queue(BrokerWorkDistributor queue, int *dependencies, int totalNodes)
@@ -86,10 +89,8 @@ namespace mustard {
         size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
         for (int i = tid; i < totalNodes; i = i + gridDim.x * blockDim.x)
         {
-            if (dependencies[i] == 0) {
-                // printf("Inserting %d", i);
+            if (dependencies[i] == 0)
                 queue.enqueue(i, 0);
-            }
         }
     }
 
@@ -114,35 +115,17 @@ namespace mustard {
         unsigned int placeholder = UINT32_MAX;
         bool placeholder_bool = false;
 
-        // printf("%d dev. Hello from scheduler starting with flags[FLAGS_SUBG_COUNT]=%d. Total subgraphs=%d\n", device, flags[0], totalSubgraphs);
-
-        //while (flags[FLAGS_SUBG_COUNT] < totalSubgraphs)
         while (nvshmem_int_atomic_fetch((int *)&flags[FLAGS_SUBG_COUNT], 0) < totalSubgraphs)
         {
             if (flags[FLAGS_OCCUP] < (100) && queue.size(0) > 0)
             {
                 queue.dequeue(placeholder_bool, placeholder, 0);
                 if (placeholder_bool) {
-                    // printf("%d dev. %d, flags[FLAGS_SUBG_COUNT]=%d\n", device, placeholder, nvshmem_int_atomic_fetch((int *)&flags[FLAGS_SUBG_COUNT], 0));
                     cudaGraphLaunch(subgraphs[placeholder], cudaStreamGraphFireAndForget);
                     nvshmem_int_atomic_inc((int *)&flags[FLAGS_SUBG_COUNT], 0);
-                } 
-                // else printf("ERR with: %d dev. %d, flags[FLAGS_SUBG_COUNT]=%d\n", device, placeholder, nvshmem_int_atomic_fetch((int *)&flags[FLAGS_SUBG_COUNT], 0));
-                // atomicAdd((int *)&flags[FLAGS_SUBG_COUNT], 1);
-                // flags[FLAGS_SUBG_COUNT]++;
-                // printf("%d dev AFTER. %d, flags[FLAGS_SUBG_COUNT]=%d\n", device, placeholder, nvshmem_int_atomic_fetch((int *)&flags[FLAGS_SUBG_COUNT], 0) );
+                }
             }
-            // cur_iter++;
         }
-
-        // printf("%d dev. Exit from scheduler with flags[0]=%d\n", device, flags[FLAGS_SUBG_COUNT]);
-
-        // if (flags[0] < 2) {
-        //     printf("Scheduler self-relaunch with flags[0]=%d\n", all_flags[0][0]);
-        //     // Query the current graph handle so we can relaunch it
-        //     cudaGraphExec_t currentGraph = cudaGetCurrentGraphExec();
-        //     cudaGraphLaunch(currentGraph, cudaStreamGraphTailLaunch);
-        // }
     }
 
 
@@ -175,11 +158,9 @@ namespace mustard {
                 checkCudaErrors(cudaStreamBeginCaptureToGraph(this->stream, this->graph, dependencies.data(), 
                                                             nullptr, dependencies.size(), cudaStreamCaptureModeGlobal));
             } else {
-                // auto dependencies = this->getSubgraphDependencies(tiles);
                 this->subgraphDependencies[index_counter] = this->getSubgraphDependencies(tiles);
                 
-                checkCudaErrors(cudaGraphCreate(&this->subgraphs[index_counter], 0)); 
-                // std::cout << "Start capturing subgraph " << index_counter << std::endl;
+                checkCudaErrors(cudaGraphCreate(&this->subgraphs[index_counter], 0));
                 checkCudaErrors(cudaStreamBeginCaptureToGraph(this->stream, this->subgraphs[index_counter], nullptr, 
                                                             nullptr, 0, cudaStreamCaptureModeGlobal));
             }
@@ -194,7 +175,6 @@ namespace mustard {
             } else {
                 checkCudaErrors(cudaStreamEndCapture(this->stream, &(this->subgraphs[index_counter])));
                 this->tileIndexByMap[this->lastModifiedTile] = this->index_counter;
-                // std::cout << "End capturing subgraph " << index_counter << std::endl;
                 this->index_counter++;
             }
             this->lastModifiedTile = std::make_pair(-1, -1);
@@ -214,25 +194,17 @@ namespace mustard {
             }
         }
 
-        // can merge only for the first src update
-        void insertDependencyKernel(int src, int dst, BrokerWorkDistributor queue, int* d_dependencies) //, int sm_count=0, volatile int * flags=NULL)
+        void insertDependencyKernel(int src, int dst, BrokerWorkDistributor queue, int* d_dependencies)
         {
             cudaGraphNode_t dependencyUpdateNode;
             cudaKernelNodeParams params = {0};
             params.gridDim = dim3(1, 1, 1);
             params.blockDim = dim3(1, 1, 1);
             params.extra = NULL;
-            // if (sm_count <= 0 || flags == NULL) {
             params.func = (void *)kernel_dep_update;
-            void *kernelArgs[3] = {&queue, &d_dependencies/*[0]*/, &dst}; 
+            void *kernelArgs[3] = {&queue, &d_dependencies, &dst}; 
             params.kernelParams = kernelArgs;
-            // } else {
-            //     params.func = (void *)kernel_dep_occup_update;
-            //     void *kernelArgs[5] = {&queue, &d_dependencies/*[0]*/, &dst, &sm_count, &flags}; 
-            //     params.kernelParams = kernelArgs;
-            // }
             std::vector<cudaGraphNode_t> deps;
-            // std::cout << "PE " << myPE << ". Inserting dependency " << src << " to " << dst << std::endl;
             deps.push_back(getTail(this->subgraphs[src]));
             checkCudaErrors(cudaGraphAddKernelNode(&dependencyUpdateNode, this->subgraphs[src], deps.data(),
                                                     deps.size(), &params));
@@ -250,17 +222,17 @@ namespace mustard {
 
             if (myPE != 0) {
                 size_t edge_count;
-                checkCudaErrors(cudaGraphNodeGetDependentNodes(root, NULL, &edge_count));
+                checkCudaErrors(MUSTARD_cudaGraphNodeGetDependentNodes(root, NULL, &edge_count));
                 if (edge_count > 0) { 
                     std::vector<cudaGraphNode_t> children(edge_count);
-                    checkCudaErrors(cudaGraphNodeGetDependentNodes(root, children.data(), &edge_count));
+                    checkCudaErrors(MUSTARD_cudaGraphNodeGetDependentNodes(root, children.data(), &edge_count));
                     root = children[0];
                 }
 
-                checkCudaErrors(cudaGraphNodeGetDependencies(tail, NULL, &edge_count));
+                checkCudaErrors(MUSTARD_cudaGraphNodeGetDependencies(tail, NULL, &edge_count));
                 if (edge_count > 0) { 
                     std::vector<cudaGraphNode_t> parents(edge_count);
-                    checkCudaErrors(cudaGraphNodeGetDependencies(tail, parents.data(), &edge_count));
+                    checkCudaErrors(MUSTARD_cudaGraphNodeGetDependencies(tail, parents.data(), &edge_count));
                     tail = parents[0];
                 }
             }
@@ -270,8 +242,8 @@ namespace mustard {
             checkCudaErrors(cudaGraphAddChildGraphNode(&node, g, deps.data(),
                                                         deps.size(), getrfSubgraph));
             //if (myPE == 0) {
-                cudaGraphAddDependencies(g, &node, &tail, 1); // add dep from subg to write memcpy 
-                cudaGraphRemoveDependencies(g, &root, &tail, 1); // remove dep from read memcpy to write memcpy
+                MUSTARD_cudaGraphAddDependencies(g, &node, &tail, 1); // add dep from subg to write memcpy 
+                MUSTARD_cudaGraphRemoveDependencies(g, &root, &tail, 1); // remove dep from read memcpy to write memcpy
             //}
         }
 
@@ -280,16 +252,11 @@ namespace mustard {
         std::map<MatrixTile, cudaGraphNode_t> tileLastModifiedByMap;
         std::map<MatrixTile, int> tileIndexByMap;
         std::map<cudaGraphNode_t, bool> visited;
-        // std::map<int, bool> occupancy_update_created;
         cudaStream_t stream;
-        // cudaGraph_t graph;
         MatrixTile lastModifiedTile;
         std::vector<cudaGraphNode_t> lastDependencies;
         int index_counter;
         bool subgraph;
-
-        // auto getDependencies(std::vector<MatrixTile> tiles, bool) {
-        // }
 
         std::vector<cudaGraphNode_t> getDependencies(std::vector<MatrixTile> tiles)
         {
@@ -337,7 +304,7 @@ namespace mustard {
 
         cudaGraphNode_t getTail(cudaGraph_t graph){
             size_t numEdges;
-            checkCudaErrors(cudaGraphGetEdges(graph, nullptr, nullptr, &numEdges));
+            checkCudaErrors(MUSTARD_cudaGraphGetEdges(graph, nullptr, nullptr, &numEdges));
             if (numEdges == 0) 
             {
                 size_t numNodes = 1;
@@ -347,7 +314,7 @@ namespace mustard {
             }
             auto from = std::make_unique<cudaGraphNode_t[]>(numEdges);
             auto to = std::make_unique<cudaGraphNode_t[]>(numEdges);
-            checkCudaErrors(cudaGraphGetEdges(graph, from.get(), to.get(), &numEdges));
+            checkCudaErrors(MUSTARD_cudaGraphGetEdges(graph, from.get(), to.get(), &numEdges));
 
             std::map<cudaGraphNode_t, bool> hasOutGoingEdge;
             std::set<cudaGraphNode_t> noOutGoingEdgeNodes;
@@ -359,20 +326,13 @@ namespace mustard {
                     noOutGoingEdgeNodes.insert(to[i]);
             }
 
-            // assert(noOutGoingEdgeNodes.size() == 1);
             if (noOutGoingEdgeNodes.size() != 1) {
-                // *: seems correct anyway, because the last node can be used 
-                // std::cout << "WARNING! The graph tails: " << noOutGoingEdgeNodes.size()  << std::endl;
                 size_t numNodes = 0;
                 checkCudaErrors(cudaGraphGetNodes(graph, nullptr, &numNodes));
             
                 std::vector<cudaGraphNode_t> nodes(numNodes);
                 cudaGraphGetNodes(graph, nodes.data(), &numNodes);
                 return nodes.back();
-
-                // auto nodes = std::make_unique<cudaGraphNode_t[]>(1);
-                // checkCudaErrors(cudaGraphGetNodes(graph, nodes.get(), &numNodes));
-                // return nodes[numNodes-1];
             }
 
             return *noOutGoingEdgeNodes.rbegin();
@@ -388,12 +348,12 @@ namespace mustard {
             {
                 auto nodeBeforeChain = lastDependencies[0];
                 size_t numDependentNodes;
-                checkCudaErrors(cudaGraphNodeGetDependentNodes(nodeBeforeChain, nullptr, &numDependentNodes));
+                checkCudaErrors(MUSTARD_cudaGraphNodeGetDependentNodes(nodeBeforeChain, nullptr, &numDependentNodes));
 
                 assert(numDependentNodes > 0);
 
                 auto dependentNodes = std::make_unique<cudaGraphNode_t[]>(numDependentNodes);
-                checkCudaErrors(cudaGraphNodeGetDependentNodes(nodeBeforeChain, dependentNodes.get(), &numDependentNodes));
+                checkCudaErrors(MUSTARD_cudaGraphNodeGetDependentNodes(nodeBeforeChain, dependentNodes.get(), &numDependentNodes));
 
                 cudaGraphNode_t chainBeginningNode;
                 for (int i = 0; i < numDependentNodes; i++)
@@ -409,16 +369,12 @@ namespace mustard {
                 while (true)
                 {
                     visited[u] = true;
-                    checkCudaErrors(cudaGraphNodeGetDependentNodes(u, nullptr, &numDependentNodes));
+                    checkCudaErrors(MUSTARD_cudaGraphNodeGetDependentNodes(u, nullptr, &numDependentNodes));
                     if (numDependentNodes == 0)
                         break;
 
-                    // *: seems correct anyway, because they are joined in the future (have the same tail) 
-                    // if(numDependentNodes != 1)
-                    //     std::cout << "WARNING! Node has many children, assuming future join of " << numDependentNodes  << std::endl;
-                    
                     std::vector<cudaGraphNode_t> nodes(numDependentNodes);
-                    checkCudaErrors(cudaGraphNodeGetDependentNodes(u, nodes.data(), &numDependentNodes));
+                    checkCudaErrors(MUSTARD_cudaGraphNodeGetDependentNodes(u, nodes.data(), &numDependentNodes));
                     u = nodes.back();
                 }
 

@@ -1,8 +1,9 @@
+#pragma once
+
 #include <cuda_runtime.h>
 #include <cuda_runtime_api.h>
 #include <iomanip>
-
-#include "gen.h"
+#include <iostream>
 
 template <typename T>
 void __check(T result, char const *const func, const char *const file, int const line)
@@ -16,7 +17,7 @@ void __check(T result, char const *const func, const char *const file, int const
 
 #define checkCudaErrors(val) __check((val), #val, __FILE__, __LINE__)
 
-void showMemUsage()
+inline void showMemUsage()
 {
     // show memory usage of GPU
     size_t free_byte;
@@ -45,13 +46,13 @@ __global__ void warmUp()
     ib += ia + static_cast<float>(tid);
 }
 
-void warmUpCudaDevice()
+inline void warmUpCudaDevice()
 {
     warmUp<<<32, 32>>>();
     cudaDeviceSynchronize();
 }
 
-void initializeCudaDevice(bool displayDeviceInfo)
+inline void initializeCudaDevice(bool displayDeviceInfo)
 {
     // checkCudaErrors(cudaSetDevice(0));
 
@@ -108,11 +109,11 @@ float CudaEventClock::getTimeInSeconds()
     return time * 1e-3f;
 }
 
-void printSquareMatrix(double *h_A, const size_t n)
+inline void printSquareMatrix(double *h_A, const size_t n)
 {
-    for (int i = 0; i < n; i++)
+    for (size_t i = 0; i < n; i++)
     {
-        for (int j = 0; j < n; j++)
+        for (size_t j = 0; j < n; j++)
         {
             if (j != 0)
                 std::cout << " ";
@@ -122,15 +123,15 @@ void printSquareMatrix(double *h_A, const size_t n)
     }
 }
 
-void printMatrix(double *h_A, const size_t n, const size_t m)
+inline void printMatrix(double *h_A, const size_t n, const size_t m)
 {
-    for (int i = 0; i < n; i++)
+    for (size_t i = 0; i < n; i++)
     {
-        for (int j = 0; j < m; j++)
+        for (size_t j = 0; j < m; j++)
         {
             if (j != 0)
                 std::cout << " ";
-            std::cout << std::setw(8) << std::setprecision(6) << h_A[i * n + j];
+            std::cout << std::setw(8) << std::setprecision(6) << h_A[i * m + j];
         }
         std::cout << std::endl;
     }
