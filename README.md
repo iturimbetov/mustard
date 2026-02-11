@@ -1,4 +1,5 @@
-# Mustard: MUlti-gpu Scheduling of TAsk gRaphs on the Device
+# A Device-Side Execution Model for Multi-GPU Task Graphs
+## (a.k.a Mustard: MUlti-gpu Scheduling of TAsk gRaphs on the Device)
 
 Mustard is a device-side execution model for static task graphs that moves the
 runtime functionality to the GPU, minimizing runtime overheads. It transforms a
