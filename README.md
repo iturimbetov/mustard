@@ -172,8 +172,8 @@ GPUs is determined by the number of MPI ranks.
 ### Multiple GPUs (single node)
 
 ```bash
-nvshmrun -np 4 ./lu_mustard -n=6000 -t=10 --subgraph -r=5
-nvshmrun -np 8 ./cholesky_mustard -n=24000 -t=8 --tiled -r=10
+mpirun -np 4 ./lu_mustard -n=6000 -t=10 --subgraph -r=5
+mpirun -np 8 ./cholesky_mustard -n=24000 -t=8 --tiled -r=10
 ```
 
 ### Multiple nodes (partitioned LU)
@@ -209,7 +209,7 @@ Usage: ./lu_mustard [options]
 
   Examples:
     ./lu_mustard -n=600 -t=2 --tiled --verify
-    nvshmrun -np 4 ./lu_mustard -n=6000 -t=10 --subgraph -r=5
+    mpirun -np 4 ./lu_mustard -n=6000 -t=10 --subgraph -r=5
 ```
 
 `p_lu_mustard` additionally accepts `-p, -P=<int>` to select which PE's graph
